@@ -5,7 +5,7 @@
 <style>
 :root{--bg:#15171c;--panel:#1f2229;--line:#2e323b;--txt:#e8eaef;--mut:#9aa0ad;--acc:#4f8cff;--ok:#36c37a;--bad:#ff5c5c}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,"Noto Sans Thai","Sarabun",system-ui,sans-serif;overflow:hidden;touch-action:none}
-#top{position:fixed;top:0;left:0;right:0;padding:10px 14px;background:linear-gradient(var(--bg) 60%,transparent);z-index:5;pointer-events:none}
+#top{position:fixed;top:0;left:0;right:0;padding:10px 104px 10px 14px;background:linear-gradient(var(--bg) 60%,transparent);z-index:5;pointer-events:none}
 #stage{font-size:12px;color:var(--acc);letter-spacing:.3px;font-weight:600}#title{font-size:17px;font-weight:700;margin-top:2px;line-height:1.3}#tip{font-size:12.5px;color:var(--mut);margin-top:3px;max-width:560px}
 #prog{height:4px;background:var(--line);border-radius:2px;margin-top:8px;overflow:hidden;max-width:560px}#prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
 #hud{position:fixed;top:10px;right:12px;z-index:5;font-size:12px;color:var(--mut);text-align:right;pointer-events:none}#hud b{color:var(--txt);font-size:15px}
@@ -64,88 +64,103 @@ const Q={
  spin:{q:'หลังขันฝาประกับครบ ต้องตรวจอะไร?',o:['หมุนเพลาข้อเหวี่ยงด้วยมือ ต้องหมุนคล่อง','เติมน้ำมันเครื่องทันที','ติดเครื่องทดสอบ','ไม่ต้องตรวจ'],a:0,e:'คู่มือระบุให้ตรวจว่าเพลาข้อเหวี่ยงหมุนได้คล่อง · ถ้าฝืด = แบริ่งผิดเบอร์/ผิดด้าน/ขันเกิน · ตรวจระยะรุน (thrust clearance) ด้วยไดอัลเกจเทียบคู่มือ'},
  ringGap:{q:'ปากแหวนลูกสูบ 3 ตัว ควรวางอย่างไร?',o:['เยื้องกันประมาณ 120° ไม่ตรงแนวสลัก','ให้ตรงกันทั้ง 3 ตัว','ตรงแนวสลักลูกสูบทุกตัว','ไม่สำคัญ'],a:0,e:'ปากแหวนเยื้องกันเพื่อกันกำลังอัดรั่ว และไม่อยู่แนวสลัก/แนวแรงด้านข้าง'},
  ringMark:{q:'ตัวอักษร/เครื่องหมายบนแหวนอัด ต้องหันไปทางใด?',o:['หันขึ้นด้านหัวลูกสูบ','หันลงด้านกระโปรง','ด้านไหนก็ได้','หันเข้าหาสลัก'],a:0,e:'เครื่องหมาย (T, R, N ฯลฯ) หันขึ้นเสมอ ใส่กลับด้านทำให้กินน้ำมัน'},
- pistonDir:{q:'ลูกศรบนหัวลูกสูบชี้ไปทางใด?',o:['ด้านหน้าเครื่อง (ด้านสายพานราวลิ้น)','ด้านหลังเครื่อง','ด้านไอดี','ด้านไอเสีย'],a:0,e:'ลูกศร/รอยบากบนหัวลูกสูบและตัวเลขบนก้านสูบหันด้านหน้าเครื่องเสมอ'},
+ pistonDir:{q:'ลูกศรบนหัวลูกสูบชี้ไปทางใด?',o:['ด้านหน้าเครื่อง (ด้านโซ่ราวลิ้น)','ด้านหลังเครื่อง','ด้านไอดี','ด้านไอเสีย'],a:0,e:'ลูกศร/รอยบากบนหัวลูกสูบและตัวเลขบนก้านสูบหันด้านหน้าเครื่องเสมอ'},
  rodT:{q:'น็อตฝาประกับก้านสูบ 1ZZ-FE ขันเท่าใด?',o:['20 N·m แล้วเพิ่ม 90°','44 N·m แล้วเพิ่ม 90°','60 N·m ครั้งเดียว','ขันแน่นด้วยมือ'],a:0,e:'Toyota: 20 N·m (200 kgf·cm) + 90° · ตัวเลขบนก้านและฝาต้องอยู่ด้านเดียวกัน'},
- headT:{q:'ขันน็อตฝาสูบ 1ZZ-FE อย่างไร?',o:['49 N·m ตามลำดับจากกลางออก → ทำเครื่องหมายสี → เพิ่ม 90° → เพิ่มอีก 90°','ขันจากปลายเข้าหากลาง 49 N·m','100 N·m ครั้งเดียว','ขันตามใจ'],a:0,e:'คู่มือ Toyota: ทาน้ำมันเกลียว ขัน 49 N·m (500 kgf·cm) ตามลำดับ → ทำเครื่องหมายหน้าหัวน็อต → ขันเพิ่ม 90° ตามลำดับ → เพิ่มอีก 90°'},
+ headT:{q:'ขันน็อตฝาสูบ 1ZZ-FE อย่างไร?',o:['49 N·m ตามลำดับจากกลางออก → ทำเครื่องหมายสี → ขันเพิ่ม 90° ตามลำดับเดิม','ขันจากปลายเข้าหากลาง 49 N·m','100 N·m ครั้งเดียว','ขันตามใจ'],a:0,e:'คู่มือ Toyota: ทาน้ำมันเกลียว ขัน 49 N·m (500 kgf·cm) ตามลำดับ → ทำเครื่องหมายสีหน้าหัวน็อต → ขันเพิ่ม 90° ตามลำดับเดิม (ครั้งเดียว) → ตรวจว่าเครื่องหมายหมุนไป 90°'},
  gasket:{q:'ปะเก็นฝาสูบใส่อย่างไร?',o:['ตามเครื่องหมาย/รูน้ำมันตรงกับเสื้อสูบ ห้ามทากาว','ทากาวซีลทั้งสองด้าน','ด้านไหนก็ได้','ใส่ของเก่าซ้ำได้'],a:0,e:'ปะเก็นโลหะหลายชั้น (MLS) ใส่ใหม่เสมอ ตรวจรูน้ำ-รูน้ำมันให้ตรง ไม่ทากาว'},
  timing:{q:'ก่อนใส่โซ่ราวลิ้น ต้องตั้งอะไร?',o:['เครื่องหมายบนเฟืองเพลาข้อเหวี่ยงและเฟืองแคมให้ตรงมาร์ก (สูบ 1 TDC)','หมุนแคมสุ่ม ๆ','ตั้งลูกสูบ 1 ที่จุดต่ำสุด','ไม่ต้องตั้ง'],a:0,e:'คู่มือ Toyota: ตั้งสูบ 1 TDC จังหวะอัด ลิ่มเพลาข้อเหวี่ยงชี้ขึ้น · โซ่มีข้อสีเหลือง 3 ข้อ ให้ตรงมาร์กเฟืองข้อเหวี่ยงและเฟืองแคมทั้งสอง · ห้ามหมุนเพลาข้อเหวี่ยงก่อนใส่ตัวตั้งโซ่'},
- valveOrder:{q:'ลำดับประกอบชุดวาล์ว 1 ตัว?',o:['ซีลก้านวาล์ว → วาล์ว → แหวนรองสปริง → สปริง → จานรองสปริง → ประกับ','สปริง → วาล์ว → ซีล → ประกับ','วาล์ว → ประกับ → สปริง','ไม่มีลำดับ'],a:0,e:'ใส่วาล์วผ่านปลอกก่อน (ทาน้ำมัน) ซีลใหม่ทุกตัว แล้วกดสปริงใส่ประกับด้วยเครื่องมือกดสปริง'},
- lash:{q:'ตรวจระยะห่างวาล์ว (valve clearance) ด้วยอะไร เมื่อใด?',o:['ฟิลเลอร์เกจ ขณะเครื่องเย็น ที่ส้นลูกเบี้ยวหันขึ้น','ไดอัลเกจ ขณะเครื่องร้อน','พลาสติเกจ','ไม่ต้องตรวจ 1ZZ ปรับเอง'],a:0,e:'คู่มือ Toyota: ตรวจขณะเย็น ไอดี 0.15–0.25 มม. / ไอเสีย 0.25–0.35 มม. · 1ZZ-FE ปรับโดยเปลี่ยนลูกกระทุ้งความหนาต่างกัน'},
- pan:{q:'อ่างน้ำมันเครื่อง 1ZZ-FE ใส่อย่างไร?',o:['ทากาวซีล (RTV/FIPG) เป็นเส้นต่อเนื่อง แล้วขันภายใน 10 นาที','ใช้ปะเก็นกระดาษ','ไม่ต้องใช้อะไร','ทาจาระบี'],a:0,e:'ทำความสะอาดผิว ทา FIPG เส้นต่อเนื่อง ~3-4 มม. ขันตามลำดับก่อนกาวเซ็ตตัว'},
- plug:{q:'ค่าแรงบิดหัวเทียน?',o:['≈ 18 N·m (180 kgf·cm)','50 N·m','5 N·m','ขันแน่นสุดแรง'],a:0,e:'ขันเกินทำให้เกลียวฝาสูบอะลูมิเนียมเสีย · ตรวจระยะเขี้ยว 1.0–1.1 มม.'},
+ valveOrder:{q:'ลำดับประกอบชุดวาล์ว 1 ตัว?',o:['แหวนรองสปริง → ซีลก้านวาล์ว → วาล์ว → สปริง → จานรองสปริง → ประกับ','สปริง → วาล์ว → ซีล → ประกับ','วาล์ว → ประกับ → สปริง','ไม่มีลำดับ'],a:0,e:'คู่มือ Toyota 1ZZ-FE: วางแหวนรองสปริง → กดซีลก้านวาล์วตัวใหม่ → ทาน้ำมันแล้วสอดวาล์ว → สปริง → จานรอง → กดสปริงด้วยเครื่องมือแล้วใส่ประกับ 2 ชิ้น · ครบ 16 ตัวแล้วจึงใส่ลูกกระทุ้ง'},
+ lash:{q:'ตรวจระยะห่างวาล์ว (valve clearance) ด้วยอะไร เมื่อใด?',o:['ฟิลเลอร์เกจ ขณะเครื่องเย็น วัดระหว่างลูกกระทุ้งกับโคนลูกเบี้ยว (ยอดลูกเบี้ยวไม่กดวาล์ว)','ไดอัลเกจ ขณะเครื่องร้อน','พลาสติเกจ','ไม่ต้องตรวจ 1ZZ ปรับเอง'],a:0,e:'คู่มือ Toyota: ตรวจขณะเย็น หลังประกอบโซ่ ตัวตั้งโซ่ และพูลเลย์แล้ว · ตั้งสูบ 1 TDC จังหวะอัด วัดชุดแรก แล้วหมุนเพลาข้อเหวี่ยง 1 รอบ วัดชุดที่เหลือ · ไอดี 0.15–0.25 มม. / ไอเสีย 0.25–0.35 มม. · 1ZZ-FE ปรับโดยเปลี่ยนลูกกระทุ้งความหนาต่างกัน'},
+ pan:{q:'อ่างน้ำมันเครื่อง 1ZZ-FE ใส่อย่างไร?',o:['ทากาวซีล (FIPG) เป็นเส้นต่อเนื่อง แล้วประกอบภายใน 3 นาที','ใช้ปะเก็นกระดาษ','ไม่ต้องใช้อะไร','ทาจาระบี'],a:0,e:'คู่มือ Toyota: ทำความสะอาดผิวและรูน็อต ทา FIPG เส้นต่อเนื่อง 3.5–4.5 มม. ประกอบภายใน 3 นาที · ขัน 9 N·m · ห้ามเติมน้ำมันเครื่องภายใน 2 ชั่วโมง'},
+ plug:{q:'ค่าแรงบิดหัวเทียน?',o:['25 N·m (255 kgf·cm)','50 N·m','5 N·m','ขันแน่นสุดแรง'],a:0,e:'คู่มือ Toyota 1ZZ-FE: 25 N·m (255 kgf·cm, 18 ft·lbf) · ขันเกินทำให้เกลียวฝาสูบอะลูมิเนียมเสีย · ตรวจระยะเขี้ยว 1.0–1.1 มม.'},
 };
 const S=(t,parts,o={})=>Object.assign({t,parts:[].concat(parts)},o);
+// Step order follows the Toyota 1ZZ-FE engine repair manual (cylinder block, cylinder head and partial engine overhaul).
+// A step with `attach` is a sub-assembly done on the workbench: its parts are fitted to that part, then travel with it.
+const VSET=v=>[`valve_spring_seat_${v}`,`valve_stem_seal_${v}`,`valve_${v}`,`valve_spring_${v}`,`valve_retainer_${v}`,`valve_keeper_${v}_1`,`valve_keeper_${v}_2`];
+const LIFT=VALVES.map(v=>`lifter_${v}`);
 const STAGES=[
- {name:'1 · เพลาข้อเหวี่ยง',cam:'under',hideBlock:false,steps:[
-  S('ใส่แบริ่งตัวบน (ชาร์ปอก) ลงเสื้อสูบ 5 ตัว',N('main_bearing_',5,'_upper'),{tip:'ด้านมีรูน้ำมัน/ร่องอยู่ฝั่งเสื้อสูบ · ลิ้นล็อกตรงร่องบาก'}),
-  S('ใส่แหวนกันรุนตัวบน (ข้อเหวี่ยงกลาง)',['thrust_washer_front_upper','thrust_washer_rear_upper'],{tip:'ร่องน้ำมันหันออกหาเพลา'}),
-  {quiz:Q.oil},
-  S('วางเพลาข้อเหวี่ยง',['crankshaft'],{tip:'วางตรง ๆ ช้า ๆ'}),
-  S('ใส่แบริ่งตัวล่าง 5 ตัว',N('main_bearing_',5,'_lower'),{tip:'ตัวล่างไม่มีรูน้ำมัน'}),
-  S('ใส่แหวนกันรุนตัวล่าง',['thrust_washer_front_lower','thrust_washer_rear_lower']),
-  {quiz:Q.plasti},
-  S('ประกอบฝาประกับเพลาข้อเหวี่ยง (ladder)',['bearing_cap_ladder'],{tip:'ลูกศรชี้หน้าเครื่อง'}),
-  {quiz:Q.mainT},
-  S('ขันน็อตฝาประกับ 10 ตัว ตามลำดับ',[1,2,6,3,4,5,7,10,9,8].map(i=>`main_cap_bolt_${i}`),{ordered:true,tip:'จากกลางออกนอก · 22 N·m → 44 N·m → +45° ×2 · จากนั้นน็อตหกเหลี่ยม 10 ตัว 19 N·m',auto:N('ladder_bolt_',10)}),
-  S('ใส่ซีลท้ายเพลาข้อเหวี่ยง',['crank_rear_seal'],{tip:'ทาน้ำมันที่ปากซีล กดให้เสมอ'}),
-  {quiz:Q.spin},
- ]},
- {name:'2 · ลูกสูบและก้านสูบ (บนโต๊ะงาน)',cam:'bench',hideBlock:true,bench:true,steps:[
+ {name:'1 · ลูกสูบและก้านสูบ (บนโต๊ะงาน)',cam:'bench',hideBlock:true,steps:[
   ...CYL.flatMap(c=>[
-   S(`สูบ ${c}: ใส่แหวนน้ำมัน → แหวนอัดตัวที่ 2 → แหวนอัดตัวบน`,[`ring_oil_control_${c}`,`ring_second_compression_${c}`,`ring_top_compression_${c}`],{ordered:true,attach:`piston_${c}`,focus:`piston_${c}`,tip:'ใช้คีมถ่างแหวน อย่าถ่างเกิน · เครื่องหมายหันขึ้น'}),
-   S(`สูบ ${c}: ใส่ก้านสูบ สลัก และแหวนล็อก`,[`connecting_rod_${c}`,`piston_pin_${c}`,`pin_circlip_${c}_a`,`pin_circlip_${c}_b`],{ordered:true,attach:`piston_${c}`,focus:`piston_${c}`,tip:'ลูกศรลูกสูบและเลขก้านสูบหันทางเดียวกัน'}),
-   S(`สูบ ${c}: ใส่แบริ่งก้านตัวบน`,[`rod_bearing_${c}_upper`],{attach:`piston_${c}`,focus:`piston_${c}`}),
+   S(`สูบ ${c}: แหวนล็อกตัวแรก → ก้านสูบ → สลักลูกสูบ → แหวนล็อกตัวที่สอง`,[`pin_circlip_${c}_a`,`connecting_rod_${c}`,`piston_pin_${c}`,`pin_circlip_${c}_b`],{ordered:true,attach:`piston_${c}`,focus:`piston_${c}`,tip:'อุ่นลูกสูบ 80–90 °C · เครื่องหมายด้านหน้าของลูกสูบและก้านสูบหันทางเดียวกัน · ดันสลักด้วยนิ้วหัวแม่มือ'}),
+   S(`สูบ ${c}: ใส่แหวนน้ำมัน → แหวนอัดตัวที่ 2 → แหวนอัดตัวบน`,[`ring_oil_control_${c}`,`ring_second_compression_${c}`,`ring_top_compression_${c}`],{ordered:true,attach:`piston_${c}`,focus:`piston_${c}`,tip:'แหวนอัดใช้คีมถ่างแหวน อย่าถ่างเกิน · เครื่องหมายหันขึ้น'}),
+   S(`สูบ ${c}: ใส่แบริ่งก้านตัวบนเข้าก้านสูบ`,[`rod_bearing_${c}_upper`],{attach:`piston_${c}`,focus:`rod_bearing_${c}_upper`,camOff:[0.18,-0.18,0.26],tip:'ลิ้นล็อกตรงร่องบาก · หลังแบริ่งต้องสะอาด ไม่มีน้ำมัน'}),
+   S(`สูบ ${c}: ใส่แบริ่งก้านตัวล่างเข้าฝาประกับก้าน`,[`rod_bearing_${c}_lower`],{attach:`rod_cap_${c}`,focus:`rod_cap_${c}`,tip:'ลิ้นล็อกตรงร่องบาก · หลังแบริ่งต้องสะอาด ไม่มีน้ำมัน'}),
   ]),
   {quiz:Q.ringGap},{quiz:Q.ringMark},
  ]},
- {name:'3 · ใส่ลูกสูบลงกระบอกสูบ',cam:'top',hideBlock:false,blockMode:'cut',steps:[
+ {name:'2 · เพลาข้อเหวี่ยง',cam:'under',steps:[
+  S('ใส่แบริ่งตัวบน (ชาร์ฟอก) ลงเสื้อสูบ 5 ตัว',N('main_bearing_',5,'_upper'),{tip:'ด้านมีรูน้ำมัน/ร่องอยู่ฝั่งเสื้อสูบ · ลิ้นล็อกตรงร่องบาก'}),
+  S('บนโต๊ะงาน · ใส่แบริ่งตัวล่าง 5 ตัว ลงในฝาประกับเพลาข้อเหวี่ยง (ladder)',N('main_bearing_',5,'_lower'),{attach:'bearing_cap_ladder',camOff:[0.05,0.95,0.72],tip:'ตัวล่างไม่มีรูน้ำมัน · ลิ้นล็อกตรงร่องบาก'}),
+  S('ใส่แหวนกันรุน 2 ชิ้น ที่ข้อหลักตัวที่ 3 ของเสื้อสูบ',['thrust_washer_front_upper','thrust_washer_rear_upper'],{tip:'ร่องน้ำมันหันออกหาเพลา · 1ZZ-FE มีแหวนกันรุนเฉพาะฝั่งเสื้อสูบ 2 ชิ้น'}),
+  {quiz:Q.oil},
+  S('วางเพลาข้อเหวี่ยง',['crankshaft'],{tip:'วางตรง ๆ ช้า ๆ'}),
+  {quiz:Q.plasti},
+  S('ประกอบฝาประกับเพลาข้อเหวี่ยง (ladder) พร้อมแบริ่งตัวล่าง',['bearing_cap_ladder'],{tip:'ทากาวซีล (FIPG) แล้วประกอบภายใน 3 นาที'}),
+  {quiz:Q.mainT},
+  S('ขันน็อตฝาประกับ 10 ตัว ตามลำดับ',[1,2,6,3,4,5,7,10,9,8].map(i=>`main_cap_bolt_${i}`),{ordered:true,tip:'จากกลางออกนอก · 22 N·m → 44 N·m → +45° ×2 · จากนั้นน็อตหกเหลี่ยม 10 ตัว 19 N·m',auto:N('ladder_bolt_',10)}),
+  {quiz:Q.spin},
+ ]},
+ {name:'3 · ใส่ลูกสูบลงกระบอกสูบ',cam:'top',blockMode:'cut',steps:[
   {quiz:Q.pistonDir},
   ...CYL.map(c=>S(`ใส่ลูกสูบสูบ ${c} ลงกระบอกสูบ (ใช้ปลอกรัดแหวน)`,[`piston_${c}`],{tip:'ทาน้ำมันกระบอกสูบ · ลูกศรชี้หน้าเครื่อง · เคาะเบา ๆ ด้วยด้ามค้อน'})),
-  ...CYL.map(c=>S(`สูบ ${c}: แบริ่งก้านตัวล่าง → ฝาประกับก้าน → น็อต 2 ตัว`,[`rod_bearing_${c}_lower`,`rod_cap_${c}`,`rod_cap_bolt_${c}_1`,`rod_cap_bolt_${c}_2`],{ordered:true,tip:'เลขบนฝาตรงกับก้าน · 20 N·m + 90°'})),
+  ...CYL.map(c=>S(`สูบ ${c}: ฝาประกับก้าน (พร้อมแบริ่งตัวล่าง) → น็อต 2 ตัว`,[`rod_cap_${c}`,`rod_cap_bolt_${c}_1`,`rod_cap_bolt_${c}_2`],{ordered:true,tip:'เลขบนฝาตรงกับก้าน · 20 N·m + 90°'})),
   {quiz:Q.rodT},
  ]},
- {name:'4 · ระบบหล่อลื่น',cam:'under',hideBlock:false,steps:[
-  S('ใส่ปั๊มน้ำมันเครื่อง',['oil_pump'],{auto:N('oil_pump_bolt_',5)}),
-  S('ใส่ท่อดูดน้ำมันเครื่อง (strainer)',['oil_strainer'],{auto:N('strainer_nut_',2)}),
+ {name:'4 · ระบบหล่อลื่น',cam:'under',steps:[
+  S('ใส่ท่อดูดน้ำมันเครื่อง (strainer)',['oil_strainer'],{auto:N('strainer_nut_',2),tip:'ปะเก็นใหม่ · 9 N·m'}),
   {quiz:Q.pan},
-  S('ใส่อ่างน้ำมันเครื่อง',['oil_pan'],{auto:[...N('oil_pan_bolt_',14),...N('oil_pan_nut_',2)]}),
-  S('ใส่น็อตถ่ายน้ำมันเครื่อง และกรองน้ำมันเครื่อง',['drain_plug_1','oil_filter_1'],{tip:'กรอง: ทาน้ำมันที่ยางซีล ขันมือ +3/4 รอบ'}),
+  S('ใส่อ่างน้ำมันเครื่อง',['oil_pan'],{auto:[...N('oil_pan_bolt_',14),...N('oil_pan_nut_',2)],tip:'ยึด 16 จุด 9 N·m'}),
+  S('ใส่น็อตถ่ายน้ำมันเครื่อง',['drain_plug_1'],{tip:'ปะเก็นใหม่ · 37 N·m'}),
+  S('ใส่ซีลท้ายเพลาข้อเหวี่ยง',['crank_rear_seal'],{cam:'rear',tip:'ทาจาระบีบาง ๆ ที่ปากซีล · ตอกให้เสมอขอบ'}),
+  S('ใส่กรองน้ำมันเครื่อง',['oil_filter_1'],{cam:'under',tip:'ทาน้ำมันที่ยางซีล · ขันมือจนยางแตะ แล้วขันเพิ่ม 3/4 รอบ'}),
  ]},
- {name:'5 · ฝาสูบ',cam:'head',hideBlock:false,steps:[
-  {quiz:Q.gasket},
-  S('วางปะเก็นฝาสูบ',['head_gasket'],{tip:'ตรวจรูน้ำ/รูน้ำมันให้ตรง'}),
-  S('วางฝาสูบ',['cylinder_head'],{tip:'ยกลงตรง ๆ ตามสลักนำ'}),
-  {quiz:Q.headT},
-  S('ขันน็อตฝาสูบ 10 ตัว ตามลำดับจากกลางออก',N('head_bolt_',10),{ordered:'centerOut',tip:'49 N·m → +90° → +90° · ทาน้ำมันเกลียวและใต้หัวน็อต'}),
- ]},
- {name:'6 · ชุดวาล์วและเพลาลูกเบี้ยว',cam:'head',hideBlock:false,hideHead:true,steps:[
+ {name:'5 · ฝาสูบ',cam:'head',steps:[
   {quiz:Q.valveOrder},
-  S('วาล์วไอดีสูบ 1 ตัวที่ 1: ซีล → วาล์ว → แหวนรอง → สปริง → จานรอง → ประกับ 2 ชิ้น',['valve_stem_seal_1I1','valve_1I1','valve_spring_seat_1I1','valve_spring_1I1','valve_retainer_1I1','valve_keeper_1I1_1','valve_keeper_1I1_2'],{ordered:true,focus:'valve_1I1',tip:'ทำครบ 1 ตัว อีก 15 ตัวโปรแกรมจะใส่ให้'}),
-  S('ใส่ชุดวาล์วที่เหลือ 15 ตัว (อัตโนมัติ) และลูกกระทุ้ง 16 ตัว',[],{auto:[...VALVES.slice(1).flatMap(v=>[`valve_stem_seal_${v}`,`valve_${v}`,`valve_spring_seat_${v}`,`valve_spring_${v}`,`valve_retainer_${v}`,`valve_keeper_${v}_1`,`valve_keeper_${v}_2`]),...VALVES.map(v=>`lifter_${v}`)]}),
-  {quiz:Q.lash},
-  S('วางเพลาลูกเบี้ยวไอดี และไอเสีย',['camshaft_intake','camshaft_exhaust'],{tip:'ทาน้ำมันที่ข้อ · ตั้งมาร์กตามคู่มือ'}),
+  S('บนโต๊ะงาน · วาล์วไอดีสูบ 1 ตัวที่ 1: แหวนรองสปริง → ซีล → วาล์ว → สปริง → จานรอง → ประกับ 2 ชิ้น',VSET('1I1'),{ordered:true,attach:'cylinder_head',focus:'valve_1I1',xray:['cylinder_head'],tip:'ต้องประกอบวาล์วให้ครบก่อนยกฝาสูบขึ้นเสื้อสูบ · ทำครบ 1 ตัว อีก 15 ตัวโปรแกรมจะใส่ให้'}),
+  S('บนโต๊ะงาน · ใส่ชุดวาล์วที่เหลือ 15 ตัว (อัตโนมัติ)',[],{attach:'cylinder_head',focus:'valve_1I1',xray:['cylinder_head'],auto:VALVES.slice(1).flatMap(VSET)}),
+  S('บนโต๊ะงาน · ใส่ลูกกระทุ้งวาล์ว (ใส่ตัวแรก อีก 15 ตัวโปรแกรมจะใส่ให้)',['lifter_1I1'],{attach:'cylinder_head',focus:'lifter_1I1',xray:['cylinder_head'],auto:LIFT.slice(1),tip:'ทาน้ำมันเครื่อง · ใส่กลับตำแหน่งเดิมของแต่ละตัว'}),
+  {quiz:Q.gasket},
+  S('วางปะเก็นฝาสูบ',['head_gasket'],{tip:'ปะเก็นใหม่ · ตรวจรูน้ำ/รูน้ำมันให้ตรง'}),
+  S('วางฝาสูบ (ประกอบวาล์วและลูกกระทุ้งแล้ว)',['cylinder_head'],{tip:'ยกลงตรง ๆ ตามสลักนำ'}),
+  {quiz:Q.headT},
+  S('ขันน็อตฝาสูบ 10 ตัว ตามลำดับจากกลางออก',N('head_bolt_',10),{ordered:'centerOut',tip:'49 N·m → ทำเครื่องหมายสี → +90° · ทาน้ำมันเกลียวและใต้หัวน็อต'}),
+ ]},
+ {name:'6 · เพลาลูกเบี้ยว',cam:'head',hideHead:true,steps:[
+  S('บนโต๊ะงาน · เพลาลูกเบี้ยวไอดี: ใส่เฟืองเพลาลูกเบี้ยว (ชุด VVT-i)',['cam_sprocket_intake'],{attach:'camshaft_intake',focus:'cam_sprocket_intake',tip:'จับเพลาด้วยปากกาจับงาน · น็อต 54 N·m'}),
+  S('บนโต๊ะงาน · เพลาลูกเบี้ยวไอเสีย: ใส่เฟืองเพลาลูกเบี้ยว',['cam_sprocket_exhaust'],{attach:'camshaft_exhaust',focus:'cam_sprocket_exhaust',tip:'จับเพลาด้วยปากกาจับงาน · น็อต 54 N·m'}),
+  S('วางเพลาลูกเบี้ยวไอดี และไอเสีย (พร้อมเฟือง)',['camshaft_intake','camshaft_exhaust'],{tip:'ทาน้ำมันที่ข้อ · ตั้งมาร์กตามคู่มือ'}),
   S('ใส่ฝาประกับเพลาลูกเบี้ยว: ฝาหน้า แล้ว I2–I5, E2–E5',['cam_cap_1',...N('cam_cap_I',4).map((_,i)=>`cam_cap_I${i+2}`),...N('cam_cap_E',4).map((_,i)=>`cam_cap_E${i+2}`)],{ordered:true,tip:'ฝาหน้า (No.1) 23 N·m · ฝาอื่น 13 N·m · ขันตามลำดับในคู่มือ',auto:[...N('cam_cap1_bolt_',3),...[2,3,4,5].flatMap(i=>[`cam_cap_bolt_I${i}_1`,`cam_cap_bolt_I${i}_2`,`cam_cap_bolt_E${i}_1`,`cam_cap_bolt_E${i}_2`])]}),
  ]},
- {name:'7 · ระบบจังหวะ (ไทม์มิ่ง)',cam:'front',hideBlock:false,steps:[
+ {name:'7 · ระบบจังหวะ (ไทม์มิ่ง)',cam:'front',steps:[
+  S('ใส่ปั๊มน้ำมันเครื่อง',['oil_pump'],{auto:N('oil_pump_bolt_',5),tip:'ปะเก็นใหม่ · ร่องฟันโรเตอร์ขับสวมตรงกับเพลาข้อเหวี่ยง · น็อต 5 ตัว 9 N·m'}),
+  S('ใส่แผ่นกันโซ่ (damper)',['chain_damper'],{auto:N('damper_bolt_',2),tip:'ยึดด้วยน็อต 2 ตัว · ใส่ก่อนคล้องโซ่'}),
   {quiz:Q.timing},
-  S('ใส่เฟืองเพลาข้อเหวี่ยง และเฟืองเพลาลูกเบี้ยว 2 ตัว',['crank_sprocket','cam_sprocket_intake','cam_sprocket_exhaust'],{tip:'มาร์กเฟืองตรงมาร์กอ้างอิง'}),
-  S('คล้องโซ่ราวลิ้น',['timing_chain'],{tip:'ข้อโซ่สีตรงมาร์กเฟือง'}),
-  S('ใส่รางโซ่ (slipper) แผ่นกันโซ่ (damper) และตัวตั้งโซ่ (tensioner)',['chain_slipper','chain_damper','chain_tensioner'],{ordered:true,auto:['slipper_bolt_1',...N('damper_bolt_',2),...N('tensioner_nut_',2)],tip:'ห้ามหมุนเพลาข้อเหวี่ยงก่อนใส่ตัวตั้งโซ่ · หมุนทวนเข็มเล็กน้อยเพื่อปลดสลัก แล้วหมุนตามเข็มตรวจว่าสลิปเปอร์ถูกดัน'}),
-  S('ใส่ซีลหน้าเพลาข้อเหวี่ยง และฝาครอบโซ่ราวลิ้น',['crank_front_seal','timing_cover'],{ordered:true,auto:N('timing_cover_bolt_',13),tip:'ทา FIPG ที่ฝาครอบ ขันภายใน 15 นาที · น็อต 10 มม. 13 N·m'}),
-  S('ใส่พูลเลย์เพลาข้อเหวี่ยง และเซ็นเซอร์ตำแหน่งเพลาข้อเหวี่ยง',['crank_pulley','crank_position_sensor'],{auto:['crank_pulley_bolt_1','crank_sensor_plate','crank_sensor_bolt_1'],tip:'น็อตพูลเลย์ 138 N·m (1,407 kgf·cm) · เซ็นเซอร์ 9 N·m'}),
+  S('ใส่เฟืองเพลาข้อเหวี่ยงพร้อมโซ่ราวลิ้น',['crank_sprocket','timing_chain'],{ordered:true,tip:'ข้อโซ่สีเหลืองตรงมาร์กเฟืองเพลาข้อเหวี่ยง แล้วสวมเฟืองเข้าเพลา · จากนั้นคล้องโซ่กับเฟืองเพลาลูกเบี้ยวให้ข้อสีเหลืองตรงมาร์ก'}),
+  S('ใส่รางโซ่ (slipper)',['chain_slipper'],{auto:['slipper_bolt_1'],tip:'น็อต 19 N·m · ห้ามหมุนเพลาข้อเหวี่ยงจนกว่าจะใส่ตัวตั้งโซ่'}),
+  S('ใส่แผ่นสัญญาณเซ็นเซอร์เพลาข้อเหวี่ยง (sensor plate)',['crank_sensor_plate'],{tip:'เครื่องหมาย F หันออกด้านหน้า · ต้องใส่ก่อนปิดฝาครอบโซ่'}),
+  S('บนโต๊ะงาน · ตอกซีลหน้าเพลาข้อเหวี่ยงเข้าฝาครอบโซ่ราวลิ้น',['crank_front_seal'],{attach:'timing_cover',focus:'crank_front_seal',tip:'ทาจาระบีบาง ๆ ที่ปากซีล · ตอกให้เสมอขอบฝาครอบ'}),
+  S('ประกอบฝาครอบโซ่ราวลิ้น (พร้อมซีลหน้า)',['timing_cover'],{auto:N('timing_cover_bolt_',13),tip:'ทา FIPG แล้วประกอบฝาครอบภายใน 3 นาที · น็อต 13 N·m / 19 N·m'}),
+  S('ใส่ตัวตั้งโซ่ (tensioner) จากด้านนอกฝาครอบโซ่',['chain_tensioner'],{auto:N('tensioner_nut_',2),tip:'กดลูกสูบตัวตั้งโซ่แล้วเกี่ยวขอล็อกไว้ก่อนใส่ · ทาน้ำมันที่โอริง · น็อต 2 ตัว 9 N·m'}),
+  S('ใส่พูลเลย์เพลาข้อเหวี่ยง',['crank_pulley'],{auto:['crank_pulley_bolt_1'],tip:'น็อตพูลเลย์ 138 N·m (1,407 kgf·cm) · จากนั้นหมุนเพลาข้อเหวี่ยงทวนเข็มเพื่อปลดขอล็อกตัวตั้งโซ่ แล้วหมุนตามเข็มตรวจว่ารางโซ่ถูกดัน'}),
+  S('ใส่เซ็นเซอร์ตำแหน่งเพลาข้อเหวี่ยง',['crank_position_sensor'],{auto:['crank_sensor_bolt_1'],tip:'ทาน้ำมันที่โอริง · น็อต 9 N·m'}),
  ]},
- {name:'8 · อุปกรณ์ภายนอก',cam:'side',hideBlock:false,steps:[
-  S('ใส่ปั๊มน้ำ',['water_pump'],{auto:N('water_pump_bolt_',6)}),
+ {name:'8 · ฝาครอบวาล์วและอุปกรณ์ภายนอก',cam:'side',steps:[
+  S('ใส่ปั๊มน้ำ',['water_pump'],{auto:N('water_pump_bolt_',6),tip:'โอริงใหม่'}),
   S('ใส่ท่อร่วมไอดี และท่อร่วมไอเสีย',['intake_manifold','exhaust_manifold'],{auto:[...N('intake_manifold_nut_',8),...N('exhaust_manifold_nut_',8)],tip:'ปะเก็นใหม่ ขันสลับจากกลางออก · ท่อร่วมไอเสีย 37 N·m'}),
+  {quiz:Q.lash},
+  S('บนโต๊ะงาน · ใส่ปะเก็นเข้าฝาครอบวาล์ว',['head_cover_gasket'],{attach:'head_cover',camOff:[0.25,-0.40,0.55],tip:'ปะเก็นใหม่'}),
+  S('ประกอบฝาครอบวาล์ว (พร้อมปะเก็น)',['head_cover'],{auto:[...N('head_cover_bolt_',9),...N('head_cover_nut_',2)],tip:'ทากาวซีล (FIPG) 2 จุด แล้วประกอบภายใน 3 นาที'}),
   {quiz:Q.plug},
-  S('ใส่หัวเทียน 4 ตัว และคอยล์จุดระเบิด 4 ตัว',[...N('spark_plug_',4),...N('ignition_coil_',4)],{auto:N('coil_bolt_',4),xray:['cylinder_head','head_cover'],tip:'หัวเทียน 18 N·m (ขันมือก่อน) · คอยล์เสียบลงท่อหัวเทียน น็อต 9 N·m'}),
-  S('ใส่ปะเก็นฝาครอบวาล์ว ฝาครอบวาล์ว และฝาเติมน้ำมันเครื่อง',['head_cover_gasket','head_cover','oil_filler_cap'],{ordered:true,auto:[...N('head_cover_bolt_',9),...N('head_cover_nut_',2)]}),
+  S('ใส่หัวเทียน 4 ตัว',N('spark_plug_',4),{xray:['cylinder_head','head_cover'],tip:'25 N·m (ขันมือก่อน)'}),
+  S('ใส่ฝาเติมน้ำมันเครื่อง',['oil_filler_cap'],{tip:'ปะเก็นใหม่'}),
+  S('ใส่คอยล์จุดระเบิด 4 ตัว',N('ignition_coil_',4),{auto:N('coil_bolt_',4),xray:['head_cover'],tip:'ใส่หลังฝาครอบวาล์วและหัวเทียน · คอยล์เสียบลงท่อหัวเทียน น็อต 9 N·m'}),
  ]},
 ];
 const THAI=[[/^block$/,'เสื้อสูบ'],[/^crankshaft/,'เพลาข้อเหวี่ยง'],[/^bearing_cap_ladder/,'ฝาประกับเพลาข้อเหวี่ยง (ladder)'],[/^main_bearing_(\d)_(upper|lower)/,'แบริ่งเพลาข้อเหวี่ยง ตัว$1 ($2)'],[/^thrust_washer/,'แหวนกันรุน'],[/^main_cap_bolt_(\d+)/,'น็อตฝาประกับเพลาข้อเหวี่ยง #$1'],[/^ladder_bolt/,'น็อตฝาประกับ (หกเหลี่ยม)'],
  [/^piston_pin_(\d)/,'สลักลูกสูบ สูบ$1'],[/^piston_(\d)/,'ลูกสูบ สูบ$1'],[/^pin_circlip/,'แหวนล็อกสลักลูกสูบ'],[/^ring_top_compression_(\d)/,'แหวนอัดตัวบน สูบ$1'],[/^ring_second_compression_(\d)/,'แหวนอัดตัวที่ 2 สูบ$1'],[/^ring_oil_control_(\d)/,'แหวนน้ำมัน สูบ$1'],[/^connecting_rod_(\d)/,'ก้านสูบ สูบ$1'],[/^rod_cap_bolt/,'น็อตฝาประกับก้านสูบ'],[/^rod_cap_(\d)/,'ฝาประกับก้านสูบ สูบ$1'],[/^rod_bearing_(\d)_(upper|lower)/,'แบริ่งก้านสูบ สูบ$1 ($2)'],
  [/^cylinder_head/,'ฝาสูบ'],[/^head_gasket/,'ปะเก็นฝาสูบ'],[/^head_bolt_(\d+)/,'น็อตฝาสูบ #$1'],[/^valve_stem_seal/,'ซีลก้านวาล์ว'],[/^valve_spring_seat/,'แหวนรองสปริงวาล์ว'],[/^valve_spring/,'สปริงวาล์ว'],[/^valve_retainer/,'จานรองสปริงวาล์ว'],[/^valve_keeper/,'ประกับวาล์ว'],[/^valve_(\d)I/,'วาล์วไอดี สูบ$1'],[/^valve_(\d)E/,'วาล์วไอเสีย สูบ$1'],[/^lifter/,'ลูกกระทุ้งวาล์ว'],[/^camshaft_intake/,'เพลาลูกเบี้ยวไอดี'],[/^camshaft_exhaust/,'เพลาลูกเบี้ยวไอเสีย'],[/^cam_cap_bolt|^cam_cap1_bolt/,'น็อตฝาประกับเพลาลูกเบี้ยว'],[/^cam_cap/,'ฝาประกับเพลาลูกเบี้ยว'],
- [/^cam_sprocket_intake/,'เฟืองเพลาลูกเบี้ยวไอดี'],[/^cam_sprocket_exhaust/,'เฟืองเพลาลูกเบี้ยวไอเสีย'],[/^crank_sprocket/,'เฟืองเพลาข้อเหวี่ยง'],[/^timing_chain/,'โซ่ราวลิ้น'],[/^chain_slipper/,'รางโซ่ (slipper)'],[/^chain_damper/,'แผ่นกันโซ่ (damper)'],[/^chain_tensioner/,'ตัวตั้งโซ่'],[/^timing_cover/,'ฝาครอบโซ่ราวลิ้น'],[/^crank_pulley/,'พูลเลย์เพลาข้อเหวี่ยง'],[/^crank_position_sensor/,'เซ็นเซอร์ตำแหน่งเพลาข้อเหวี่ยง'],[/^crank_front_seal/,'ซีลหน้าเพลาข้อเหวี่ยง'],[/^crank_rear_seal/,'ซีลท้ายเพลาข้อเหวี่ยง'],
+ [/^cam_sprocket_intake/,'เฟืองเพลาลูกเบี้ยวไอดี'],[/^cam_sprocket_exhaust/,'เฟืองเพลาลูกเบี้ยวไอเสีย'],[/^crank_sprocket/,'เฟืองเพลาข้อเหวี่ยง'],[/^timing_chain/,'โซ่ราวลิ้น'],[/^chain_slipper/,'รางโซ่ (slipper)'],[/^chain_damper/,'แผ่นกันโซ่ (damper)'],[/^chain_tensioner/,'ตัวตั้งโซ่'],[/^timing_cover/,'ฝาครอบโซ่ราวลิ้น'],[/^crank_pulley/,'พูลเลย์เพลาข้อเหวี่ยง'],[/^crank_sensor_plate/,'แผ่นสัญญาณเซ็นเซอร์เพลาข้อเหวี่ยง'],[/^crank_position_sensor/,'เซ็นเซอร์ตำแหน่งเพลาข้อเหวี่ยง'],[/^crank_front_seal/,'ซีลหน้าเพลาข้อเหวี่ยง'],[/^crank_rear_seal/,'ซีลท้ายเพลาข้อเหวี่ยง'],
  [/^oil_pump/,'ปั๊มน้ำมันเครื่อง'],[/^oil_strainer/,'ท่อดูดน้ำมันเครื่อง'],[/^oil_pan/,'อ่างน้ำมันเครื่อง'],[/^oil_filter/,'กรองน้ำมันเครื่อง'],[/^drain_plug/,'น็อตถ่ายน้ำมันเครื่อง'],[/^oil_filler_cap/,'ฝาเติมน้ำมันเครื่อง'],[/^water_pump/,'ปั๊มน้ำ'],[/^intake_manifold/,'ท่อร่วมไอดี'],[/^exhaust_manifold/,'ท่อร่วมไอเสีย'],[/^spark_plug_(\d)/,'หัวเทียน สูบ$1'],[/^ignition_coil_(\d)/,'คอยล์จุดระเบิด สูบ$1'],[/^head_cover_gasket/,'ปะเก็นฝาครอบวาล์ว'],[/^head_cover/,'ฝาครอบวาล์ว']];
 function thaiName(n){ for(const [re,t] of THAI){ const m=n.match(re); if(m) return t.replace(/\$(\d)/g,(_,i)=>m[i]); } return n; }
 const CASING=/^(block|cylinder_head|head_cover|timing_cover|intake_manifold|exhaust_manifold|oil_pan|head_gasket|head_cover_gasket)/;
@@ -180,7 +195,7 @@ L.parse(Uint8Array.from(atob(window.ENGINE_GLB),c=>c.charCodeAt(0)).buffer,'',g=
     if(/^(main|rod)_bearing|thrust_washer/.test(o.name)) m.color.set(0xcfa870); if(/^(valve_|ring_|piston_pin)/.test(o.name)) m.color.set(0xd8dce2); if(/seal/.test(o.name)) m.color.set(0x333); if(/sprocket/.test(o.name)) m.color.set(0x9aa0aa);
     if(o.name==='block'){ m.color.set(0x9aa0a8); } { const c=m.color; const lum=0.299*c.r+0.587*c.g+0.114*c.b; if(lum<0.18) c.setRGB(0.36,0.38,0.42); }
     o.visible=false; });
-  sc.add(g.scene); meshes.block.visible=true; applyBlock(); document.getElementById('load').style.display='none'; { const h=/#j(\d+)/.exec(location.hash); if(h){ const n=Math.min(+h[1],FLAT.length-1); for(let i=0;i<n;i++){ const f=FLAT[i]; if(f.parts){ autoPlace(f.parts); autoPlace(f.auto||[]); } } idx=n-1; window._jf=true; } } nextStep();
+  sc.add(g.scene); meshes.block.visible=true; applyBlock(); document.getElementById('load').style.display='none'; { const h=/#j(\d+)/.exec(location.hash); if(h){ const n=Math.min(+h[1],FLAT.length-1); for(let i=0;i<n;i++){ const f=FLAT[i]; if(f.parts){ autoPlace(f.parts); autoPlace(f.auto||[]); const par=f.attach&&meshes[f.attach]; if(par) [...f.parts,...(f.auto||[])].forEach(k=>{ const m=meshes[k]; if(m&&m!==par&&m.parent!==par) par.attach(m); }); } } idx=n-1; window._jf=true; } } nextStep();
 });
 function applyBlock(){ const b=meshes.block; b.visible=blockMode!=='hide'; b.material.clippingPlanes=blockMode==='cut'?[CUT]:[]; document.getElementById('btnBlock').textContent='เสื้อสูบ: '+({cut:'ผ่า',solid:'ทึบ',hide:'ซ่อน'})[blockMode]; }
 document.getElementById('btnBlock').onclick=()=>{ blockMode={cut:'solid',solid:'hide',hide:'cut'}[blockMode]; applyBlock(); };
@@ -195,20 +210,25 @@ function setCam(key){ const [p,t]=CAM[key]; cam.position.set(...p); ctl.target.s
 function nextStep(){
   idx++; if(idx>=FLAT.length){ finish(); return; }
   cur=FLAT[idx]; const st=STAGES[cur.stage]; $('prog').firstElementChild.style.width=(100*idx/FLAT.length)+'%';
-  const first=idx===0||FLAT[idx-1].stage!==cur.stage||window._jf; window._jf=false;
-  if(first){ if(!st.bench){ Object.values(meshes).forEach(m=>{ if(m.name!=='block' && m.parent && m.parent.type!=='Mesh') m.visible=placedSet.has(m.name); }); } setCam(st.cam); if(st.hideBlock){ blockMode='hide'; } else if(st.blockMode){ blockMode=st.blockMode; } else if(blockMode==='hide'){ blockMode='cut'; } applyBlock(); flash(st.name,'info',1400); }
+  const prev=idx>0?FLAT[idx-1]:null, first=!prev||prev.stage!==cur.stage||window._jf; window._jf=false;
+  const onBench=!!(cur.attach&&meshes[cur.attach]);   // a step with `attach` is done on the workbench, on that part
+  if(first){ if(st.hideBlock){ blockMode='hide'; } else if(st.blockMode){ blockMode=st.blockMode; } else if(blockMode==='hide'){ blockMode='cut'; } showEngine(st); flash(st.name,'info',1400); }
+  else if(prev.attach&&!onBench){ showEngine(st); }   // back from the workbench to the engine
   { const want=new Set(cur.xray||(st.hideHead?['cylinder_head']:[])); [...xrayOn].forEach(n=>{ if(!want.has(n)) setXray(n,false); }); want.forEach(n=>setXray(n,true)); }
   if(cur.quiz){ showQuiz(cur.quiz); return; }
   $('stage').textContent=st.name; $('title').textContent=cur.t; $('tip').textContent=cur.tip||'';
   stepParts=cur.parts.slice(); if(cur.ordered==='centerOut') stepParts=centerOut(stepParts);
   orderIdx=0; tray=stepParts.map(n=>meshes[n]).filter(Boolean);
-  if(st.bench && cur.attach && meshes[cur.attach]){ const par=meshes[cur.attach]; if(!benchDelta[cur.attach]){ benchDelta[cur.attach]=BENCH.clone().sub(home[cur.attach].p); par.position.copy(BENCH); par.quaternion.copy(home[cur.attach].q); }
+  if(onBench){ const par=meshes[cur.attach]; if(!benchDelta[cur.attach]){ benchDelta[cur.attach]=BENCH.clone().sub(home[cur.attach].p); par.position.copy(BENCH); par.quaternion.copy(home[cur.attach].q); }
     Object.values(meshes).forEach(m=>{ if(m.parent && m.parent.type!=='Mesh') m.visible=false; }); par.visible=true; par.children.forEach(c=>c.visible=true);
-    ctl.target.copy(BENCH); cam.position.copy(BENCH).add(new THREE.Vector3(0.22,0.20,0.34)); }
-  else if(cur.focus && meshes[cur.focus]){ const f=meshes[cur.focus]; const w=f.getWorldPosition(new THREE.Vector3()); ctl.target.copy(w); cam.position.copy(w).add(new THREE.Vector3(0.16,0.28,0.22)); }
+    ctl.target.copy(BENCH); cam.position.copy(BENCH).add(new THREE.Vector3(...(cur.camOff||[0.22,0.20,0.34])));
+    if(cur.focus && cur.focus!==cur.attach && home[cur.focus]){ const w=tgt(cur.focus); ctl.target.copy(w); cam.position.copy(w).add(new THREE.Vector3(...(cur.camOff||[0.16,0.28,0.22]))); } }
+  else { if(cur.cam) setCam(cur.cam);
+    if(cur.focus && meshes[cur.focus]){ const f=meshes[cur.focus]; const w=f.getWorldPosition(new THREE.Vector3()); ctl.target.copy(w); cam.position.copy(w).add(new THREE.Vector3(0.16,0.28,0.22)); } }
   if(!tray.length){ autoPlace(cur.auto||[]); setTimeout(nextStep,600); return; }
   layTray();
 }
+function showEngine(st){ Object.values(meshes).forEach(m=>{ if(m.name!=='block' && m.parent && m.parent.type!=='Mesh') m.visible=placedSet.has(m.name); }); setCam(st.cam); applyBlock(); }
 function centerOut(names){ const cx=-0.024; return names.slice().sort((a,b)=>Math.abs(home[a].p.x-cx)-Math.abs(home[b].p.x-cx)); }
 function worldHome(n){ return home[n].p.clone(); }
 
@@ -252,10 +272,13 @@ r.domElement.addEventListener('pointerup',e=>{
   let best=null,bd=1e9; targets.forEach(n=>{ const d=screenDist(e,tgt(n))-tol(n)+60; if(d<bd){bd=d;best=n;} });
   let ob=null,od=1e9; all.forEach(n=>{ if(targets.includes(n)) return; const d=screenDist(e,tgt(n))-tol(n)+60; if(d<od){od=d;ob=n;} });
   if(best && bd<60){ snap(m,best); } else if(ob && od<60){ tween(m,m.userData.trayPos,220); if(m.userData.trayScale){ m.scale.setScalar(m.userData.trayScale); if(m.userData.label) m.userData.label.scale.set(.03/m.userData.trayScale,.03/m.userData.trayScale,1); } wrong('ผิดชิ้น — ตรงนี้คือ '+thaiName(ob)); } else { tween(m,m.userData.trayPos,220); if(m.userData.trayScale){ m.scale.setScalar(m.userData.trayScale); if(m.userData.label) m.userData.label.scale.set(.03/m.userData.trayScale,.03/m.userData.trayScale,1); } if(bd<140) wrong('ใกล้แล้ว — วางให้ตรงเงาสีฟ้า'); } });
-function snap(m,target){ m.quaternion.copy(home[target].q); tween(m,tgt(target),180,()=>{ if(cur.attach && meshes[cur.attach] && m!==meshes[cur.attach]) meshes[cur.attach].attach(m); });
+function snap(m,target){ m.quaternion.copy(home[target].q); const par=cur.attach&&meshes[cur.attach]&&m!==meshes[cur.attach]?meshes[cur.attach]:null;
+  if(par){ const to=tgt(target); par.attach(m); par.updateWorldMatrix(true,false); tween(m,par.worldToLocal(to),180); } else tween(m,tgt(target),180);
   placedSet.add(target); tray=tray.filter(x=>x!==m); tray.forEach((t,i)=>t.userData.slot=i); setTop(m,false); m.userData.inTray=false; if(m.userData.label){ m.remove(m.userData.label); m.userData.label=null; } if(cur.ordered) orderIdx++; refreshGhosts(); flash('ถูกต้อง ✓','ok');
   if(stepParts.every(n=>placedSet.has(n))){ autoPlace(cur.auto||[]); setTimeout(nextStep,500); } }
-function autoPlace(names){ names.forEach(n=>{ const m=meshes[n]; if(!m) return; if(m.userData.label){ m.remove(m.userData.label); m.userData.label=null; } m.visible=true; m.position.copy(home[n].p); m.quaternion.copy(home[n].q); m.userData.inTray=false; setTop(m,false); m.scale.setScalar(1); placedSet.add(n); }); if(names.length) flash(`ใส่ให้อัตโนมัติ ${names.length} ชิ้น`,'info'); }
+function autoPlace(names){ const par=cur&&cur.attach&&benchDelta[cur.attach]?meshes[cur.attach]:null; names.forEach(n=>{ const m=meshes[n]; if(!m) return; if(m.userData.label){ m.remove(m.userData.label); m.userData.label=null; } m.visible=true; m.userData.inTray=false; setTop(m,false); placedSet.add(n);
+    if(par && m!==par){ if(m.parent!==par){ if(m.parent&&m.parent.type==='Mesh') sc.attach(m); m.scale.setScalar(1); m.position.copy(tgt(n)); m.quaternion.copy(home[n].q); par.attach(m); } }
+    else { m.position.copy(home[n].p); m.quaternion.copy(home[n].q); m.scale.setScalar(1); } }); if(names.length) flash(`ใส่ให้อัตโนมัติ ${names.length} ชิ้น`,'info'); }
 function wrong(t){ miss++; stageMiss[cur.stage]=(stageMiss[cur.stage]||0)+1; $('miss').textContent=miss; flash(t,'bad'); }
 function shake(m){ const p=m.position.x; let i=0; const id=setInterval(()=>{ m.position.x=p+(i%2?0.01:-0.01); if(++i>6){ m.position.x=p; clearInterval(id);} },40); }
 function tween(m,to,ms,cb){ const from=m.position.clone(), st=performance.now(); (function f(){ const k=Math.min(1,(performance.now()-st)/ms), e=1-Math.pow(1-k,3); m.position.lerpVectors(from,to,e); if(k<1) requestAnimationFrame(f); else cb&&cb(); })(); }
