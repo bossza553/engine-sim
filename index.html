@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ประกอบเครื่องยนต์ 1ZZ-FE — แบบฝึกสอบปฏิบัติ</title>
+<style>
+:root{--bg:#15171c;--panel:#1f2229;--line:#2e323b;--txt:#e8eaef;--mut:#9aa0ad;--acc:#4f8cff;--ok:#36c37a;--bad:#ff5c5c}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,"Noto Sans Thai","Sarabun",system-ui,sans-serif;overflow:hidden;touch-action:none}
+#top{position:fixed;top:0;left:0;right:0;padding:10px 14px;background:linear-gradient(var(--bg) 60%,transparent);z-index:5;pointer-events:none}
+#stage{font-size:12px;color:var(--acc);letter-spacing:.3px;font-weight:600}#title{font-size:17px;font-weight:700;margin-top:2px;line-height:1.3}#tip{font-size:12.5px;color:var(--mut);margin-top:3px;max-width:560px}
+#prog{height:4px;background:var(--line);border-radius:2px;margin-top:8px;overflow:hidden;max-width:560px}#prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
+#hud{position:fixed;top:10px;right:12px;z-index:5;font-size:12px;color:var(--mut);text-align:right;pointer-events:none}#hud b{color:var(--txt);font-size:15px}
+#bottom{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:10px 12px 14px;background:linear-gradient(transparent,var(--bg) 45%);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--txt);padding:9px 12px;border-radius:10px;font-size:13px;font-weight:600}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff}.btn.on{border-color:var(--acc);color:var(--acc)}.btn:active{transform:scale(.97)}
+#msg{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);background:#000b;padding:10px 16px;border-radius:12px;font-size:15px;font-weight:600;opacity:0;transition:opacity .2s;z-index:6;pointer-events:none;white-space:nowrap}
+#msg.ok{color:var(--ok)}#msg.bad{color:var(--bad)}#msg.info{color:var(--txt)}#msg.show{opacity:1}
+#quiz,#end{position:fixed;inset:0;background:#000b;z-index:10;display:none;align-items:center;justify-content:center;padding:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:460px;width:100%;max-height:90vh;overflow:auto}
+.card h3{margin:0 0 6px;font-size:17px}.card p{margin:0 0 14px;color:var(--mut);font-size:14px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:12px;border-radius:10px;border:1px solid var(--line);background:#161922;color:var(--txt);font-size:15px}
+.opt.ok{border-color:var(--ok);background:#17301f}.opt.bad{border-color:var(--bad);background:#301717}
+.exp{margin-top:10px;font-size:13px;color:var(--mut);min-height:18px}
+#load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:var(--bg);z-index:20;color:var(--mut);font-size:14px}
+#load b{color:var(--txt);font-size:18px}
+table.sc{width:100%;border-collapse:collapse;font-size:14px}table.sc td{padding:6px 4px;border-bottom:1px solid var(--line)}table.sc td:last-child{text-align:right}
+canvas{display:block}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/"}}</script>
+</head><body>
+<div id="load"><b>กำลังโหลดเครื่องยนต์…</b><span>371 ชิ้นส่วน · ครั้งแรกอาจใช้เวลาสักครู่</span></div>
+<div id="top"><div id="stage"></div><div id="title"></div><div id="tip"></div><div id="prog"><i></i></div></div>
+<div id="hud">เวลา <b id="time">0:00</b><br>ผิดพลาด <b id="miss">0</b></div>
+<div id="bottom">
+ <button class="btn" id="btnView">มุมมอง</button>
+ <button class="btn" id="btnLock">ล็อกกล้อง</button>
+ <button class="btn" id="btnBlock">เสื้อสูบ: ผ่า</button>
+ <button class="btn" id="btnHint">บอกตำแหน่ง</button>
+ <button class="btn" id="btnSkip" style="margin-left:auto">ข้ามขั้นนี้</button>
+</div>
+<div id="msg"></div>
+<div id="insp" style="position:fixed;left:50%;top:14%;transform:translateX(-50%);background:#000b;border:1px solid #4f8cff;color:#fff;padding:8px 14px;border-radius:10px;font-size:14px;z-index:6;display:none;pointer-events:none;white-space:nowrap">—</div>
+<div id="quiz"><div class="card"><h3 id="qT"></h3><p id="qP"></p><div id="qO"></div><div class="exp" id="qE"></div><div style="text-align:right;margin-top:10px"><button class="btn p" id="qNext" style="display:none">ต่อไป</button></div></div></div>
+<div id="end"><div class="card"><h3 id="eT"></h3><p id="eP"></p><div id="eB"></div><div style="text-align:right;margin-top:14px"><button class="btn p" onclick="location.reload()">ทำใหม่</button></div></div></div>
+<script src="./model.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+
+// ====================================================================
+//  EXAM CONTENT  (data — edit freely; names match the 3D parts)
+// ====================================================================
+const N=(p,n,s='')=>Array.from({length:n},(_,i)=>`${p}${i+1}${s}`);
+const CYL=[1,2,3,4], VALVES=[]; for(const c of CYL) for(const t of ['I','E']) for(const k of [1,2]) VALVES.push(`${c}${t}${k}`);
+const BENCH=new THREE.Vector3(0.0,0.30,0.45);   // where the workbench is (in front of the engine)
+const CAM={ // camera presets per stage: [pos],[target]
+ bench:[[0.28,0.55,0.80],[0.0,0.30,0.45]],
+ under:[[0.30,-0.30,0.62],[-0.03,0.16,0.02]], side:[[0.55,0.55,0.60],[-0.03,0.30,0.02]], top:[[0.25,0.95,0.45],[-0.03,0.40,0.02]],
+ front:[[0.75,0.45,0.15],[0.10,0.33,0.02]], rear:[[-0.75,0.45,0.15],[-0.12,0.33,0.02]], head:[[0.40,0.85,0.55],[-0.03,0.50,0.02]] };
+const Q={
+ oil:{q:'ก่อนวางเพลาข้อเหวี่ยง ต้องทำอะไรกับผิวแบริ่ง?',o:['ทาน้ำมันเครื่องสะอาดบาง ๆ','ทาจาระบีหนา ๆ','เช็ดให้แห้งสนิท','ทากาวซีล (RTV)'],a:0,e:'แบริ่งต้องมีฟิล์มน้ำมันตั้งแต่สตาร์ทครั้งแรก — ใช้น้ำมันเครื่องสะอาด ไม่ใช้จาระบีเพราะอุดรูน้ำมัน'},
+ plasti:{q:'ใช้อะไรตรวจระยะห่างน้ำมัน (oil clearance) ของแบริ่ง?',o:['พลาสติเกจ (Plastigauge)','ฟิลเลอร์เกจ','ไดอัลเกจ','เวอร์เนียร์'],a:0,e:'วางเส้นพลาสติเกจบนข้อเหวี่ยง ขันฝาประกับตามค่า ห้ามหมุนเพลา แล้วถอดอ่านความกว้างเทียบสเกล เทียบค่ามาตรฐานในคู่มือซ่อม'},
+ mainT:{q:'ขันน็อตฝาประกับเพลาข้อเหวี่ยง (12 เหลี่ยม 10 ตัว) 1ZZ-FE อย่างไร?',o:['22 N·m → 44 N·m → เพิ่ม 45° สองครั้ง ตามลำดับ แล้วขันน็อตหัวหกเหลี่ยมอีก 10 ตัว 19 N·m','44 N·m ครั้งเดียว','90 N·m ครั้งเดียว','ขันแน่นด้วยมือ'],a:0,e:'คู่มือ Toyota RM823E: ทาน้ำมันเกลียว ขัน 22 N·m → 44 N·m ตามลำดับ → ทำเครื่องหมายสีที่หัวน็อต → ขันเพิ่ม 45° สองครั้ง → น็อตหกเหลี่ยม 10 ตัว 19 N·m'},
+ spin:{q:'หลังขันฝาประกับครบ ต้องตรวจอะไร?',o:['หมุนเพลาข้อเหวี่ยงด้วยมือ ต้องหมุนคล่อง','เติมน้ำมันเครื่องทันที','ติดเครื่องทดสอบ','ไม่ต้องตรวจ'],a:0,e:'คู่มือระบุให้ตรวจว่าเพลาข้อเหวี่ยงหมุนได้คล่อง · ถ้าฝืด = แบริ่งผิดเบอร์/ผิดด้าน/ขันเกิน · ตรวจระยะรุน (thrust clearance) ด้วยไดอัลเกจเทียบคู่มือ'},
+ ringGap:{q:'ปากแหวนลูกสูบ 3 ตัว ควรวางอย่างไร?',o:['เยื้องกันประมาณ 120° ไม่ตรงแนวสลัก','ให้ตรงกันทั้ง 3 ตัว','ตรงแนวสลักลูกสูบทุกตัว','ไม่สำคัญ'],a:0,e:'ปากแหวนเยื้องกันเพื่อกันกำลังอัดรั่ว และไม่อยู่แนวสลัก/แนวแรงด้านข้าง'},
+ ringMark:{q:'ตัวอักษร/เครื่องหมายบนแหวนอัด ต้องหันไปทางใด?',o:['หันขึ้นด้านหัวลูกสูบ','หันลงด้านกระโปรง','ด้านไหนก็ได้','หันเข้าหาสลัก'],a:0,e:'เครื่องหมาย (T, R, N ฯลฯ) หันขึ้นเสมอ ใส่กลับด้านทำให้กินน้ำมัน'},
+ pistonDir:{q:'ลูกศรบนหัวลูกสูบชี้ไปทางใด?',o:['ด้านหน้าเครื่อง (ด้านสายพานราวลิ้น)','ด้านหลังเครื่อง','ด้านไอดี','ด้านไอเสีย'],a:0,e:'ลูกศร/รอยบากบนหัวลูกสูบและตัวเลขบนก้านสูบหันด้านหน้าเครื่องเสมอ'},
+ rodT:{q:'น็อตฝาประกับก้านสูบ 1ZZ-FE ขันเท่าใด?',o:['20 N·m แล้วเพิ่ม 90°','44 N·m แล้วเพิ่ม 90°','60 N·m ครั้งเดียว','ขันแน่นด้วยมือ'],a:0,e:'Toyota: 20 N·m (200 kgf·cm) + 90° · ตัวเลขบนก้านและฝาต้องอยู่ด้านเดียวกัน'},
+ headT:{q:'ขันน็อตฝาสูบ 1ZZ-FE อย่างไร?',o:['49 N·m ตามลำดับจากกลางออก → ทำเครื่องหมายสี → เพิ่ม 90° → เพิ่มอีก 90°','ขันจากปลายเข้าหากลาง 49 N·m','100 N·m ครั้งเดียว','ขันตามใจ'],a:0,e:'คู่มือ Toyota: ทาน้ำมันเกลียว ขัน 49 N·m (500 kgf·cm) ตามลำดับ → ทำเครื่องหมายหน้าหัวน็อต → ขันเพิ่ม 90° ตามลำดับ → เพิ่มอีก 90°'},
+ gasket:{q:'ปะเก็นฝาสูบใส่อย่างไร?',o:['ตามเครื่องหมาย/รูน้ำมันตรงกับเสื้อสูบ ห้ามทากาว','ทากาวซีลทั้งสองด้าน','ด้านไหนก็ได้','ใส่ของเก่าซ้ำได้'],a:0,e:'ปะเก็นโลหะหลายชั้น (MLS) ใส่ใหม่เสมอ ตรวจรูน้ำ-รูน้ำมันให้ตรง ไม่ทากาว'},
+ timing:{q:'ก่อนใส่โซ่ราวลิ้น ต้องตั้งอะไร?',o:['เครื่องหมายบนเฟืองเพลาข้อเหวี่ยงและเฟืองแคมให้ตรงมาร์ก (สูบ 1 TDC)','หมุนแคมสุ่ม ๆ','ตั้งลูกสูบ 1 ที่จุดต่ำสุด','ไม่ต้องตั้ง'],a:0,e:'คู่มือ Toyota: ตั้งสูบ 1 TDC จังหวะอัด ลิ่มเพลาข้อเหวี่ยงชี้ขึ้น · โซ่มีข้อสีเหลือง 3 ข้อ ให้ตรงมาร์กเฟืองข้อเหวี่ยงและเฟืองแคมทั้งสอง · ห้ามหมุนเพลาข้อเหวี่ยงก่อนใส่ตัวตั้งโซ่'},
+ valveOrder:{q:'ลำดับประกอบชุดวาล์ว 1 ตัว?',o:['ซีลก้านวาล์ว → วาล์ว → แหวนรองสปริง → สปริง → จานรองสปริง → ประกับ','สปริง → วาล์ว → ซีล → ประกับ','วาล์ว → ประกับ → สปริง','ไม่มีลำดับ'],a:0,e:'ใส่วาล์วผ่านปลอกก่อน (ทาน้ำมัน) ซีลใหม่ทุกตัว แล้วกดสปริงใส่ประกับด้วยเครื่องมือกดสปริง'},
+ lash:{q:'ตรวจระยะห่างวาล์ว (valve clearance) ด้วยอะไร เมื่อใด?',o:['ฟิลเลอร์เกจ ขณะเครื่องเย็น ที่ส้นลูกเบี้ยวหันขึ้น','ไดอัลเกจ ขณะเครื่องร้อน','พลาสติเกจ','ไม่ต้องตรวจ 1ZZ ปรับเอง'],a:0,e:'คู่มือ Toyota: ตรวจขณะเย็น ไอดี 0.15–0.25 มม. / ไอเสีย 0.25–0.35 มม. · 1ZZ-FE ปรับโดยเปลี่ยนลูกกระทุ้งความหนาต่างกัน'},
+ pan:{q:'อ่างน้ำมันเครื่อง 1ZZ-FE ใส่อย่างไร?',o:['ทากาวซีล (RTV/FIPG) เป็นเส้นต่อเนื่อง แล้วขันภายใน 10 นาที','ใช้ปะเก็นกระดาษ','ไม่ต้องใช้อะไร','ทาจาระบี'],a:0,e:'ทำความสะอาดผิว ทา FIPG เส้นต่อเนื่อง ~3-4 มม. ขันตามลำดับก่อนกาวเซ็ตตัว'},
+ plug:{q:'ค่าแรงบิดหัวเทียน?',o:['≈ 18 N·m (180 kgf·cm)','50 N·m','5 N·m','ขันแน่นสุดแรง'],a:0,e:'ขันเกินทำให้เกลียวฝาสูบอะลูมิเนียมเสีย · ตรวจระยะเขี้ยว 1.0–1.1 มม.'},
+};
+const S=(t,parts,o={})=>Object.assign({t,parts:[].concat(parts)},o);
+const STAGES=[
+ {name:'1 · เพลาข้อเหวี่ยง',cam:'under',hideBlock:false,steps:[
+  S('ใส่แบริ่งตัวบน (ชาร์ปอก) ลงเสื้อสูบ 5 ตัว',N('main_bearing_',5,'_upper'),{tip:'ด้านมีรูน้ำมัน/ร่องอยู่ฝั่งเสื้อสูบ · ลิ้นล็อกตรงร่องบาก'}),
+  S('ใส่แหวนกันรุนตัวบน (ข้อเหวี่ยงกลาง)',['thrust_washer_front_upper','thrust_washer_rear_upper'],{tip:'ร่องน้ำมันหันออกหาเพลา'}),
+  {quiz:Q.oil},
+  S('วางเพลาข้อเหวี่ยง',['crankshaft'],{tip:'วางตรง ๆ ช้า ๆ'}),
+  S('ใส่แบริ่งตัวล่าง 5 ตัว',N('main_bearing_',5,'_lower'),{tip:'ตัวล่างไม่มีรูน้ำมัน'}),
+  S('ใส่แหวนกันรุนตัวล่าง',['thrust_washer_front_lower','thrust_washer_rear_lower']),
+  {quiz:Q.plasti},
+  S('ประกอบฝาประกับเพลาข้อเหวี่ยง (ladder)',['bearing_cap_ladder'],{tip:'ลูกศรชี้หน้าเครื่อง'}),
+  {quiz:Q.mainT},
+  S('ขันน็อตฝาประกับ 10 ตัว ตามลำดับ',[1,2,6,3,4,5,7,10,9,8].map(i=>`main_cap_bolt_${i}`),{ordered:true,tip:'จากกลางออกนอก · 22 N·m → 44 N·m → +45° ×2 · จากนั้นน็อตหกเหลี่ยม 10 ตัว 19 N·m',auto:N('ladder_bolt_',10)}),
+  S('ใส่ซีลท้ายเพลาข้อเหวี่ยง',['crank_rear_seal'],{tip:'ทาน้ำมันที่ปากซีล กดให้เสมอ'}),
+  {quiz:Q.spin},
+ ]},
+ {name:'2 · ลูกสูบและก้านสูบ (บนโต๊ะงาน)',cam:'bench',hideBlock:true,bench:true,steps:[
+  ...CYL.flatMap(c=>[
+   S(`สูบ ${c}: ใส่แหวนน้ำมัน → แหวนอัดตัวที่ 2 → แหวนอัดตัวบน`,[`ring_oil_control_${c}`,`ring_second_compression_${c}`,`ring_top_compression_${c}`],{ordered:true,attach:`piston_${c}`,focus:`piston_${c}`,tip:'ใช้คีมถ่างแหวน อย่าถ่างเกิน · เครื่องหมายหันขึ้น'}),
+   S(`สูบ ${c}: ใส่ก้านสูบ สลัก และแหวนล็อก`,[`connecting_rod_${c}`,`piston_pin_${c}`,`pin_circlip_${c}_a`,`pin_circlip_${c}_b`],{ordered:true,attach:`piston_${c}`,focus:`piston_${c}`,tip:'ลูกศรลูกสูบและเลขก้านสูบหันทางเดียวกัน'}),
+   S(`สูบ ${c}: ใส่แบริ่งก้านตัวบน`,[`rod_bearing_${c}_upper`],{attach:`piston_${c}`,focus:`piston_${c}`}),
+  ]),
+  {quiz:Q.ringGap},{quiz:Q.ringMark},
+ ]},
+ {name:'3 · ใส่ลูกสูบลงกระบอกสูบ',cam:'top',hideBlock:false,blockMode:'cut',steps:[
+  {quiz:Q.pistonDir},
+  ...CYL.map(c=>S(`ใส่ลูกสูบสูบ ${c} ลงกระบอกสูบ (ใช้ปลอกรัดแหวน)`,[`piston_${c}`],{tip:'ทาน้ำมันกระบอกสูบ · ลูกศรชี้หน้าเครื่อง · เคาะเบา ๆ ด้วยด้ามค้อน'})),
+  ...CYL.map(c=>S(`สูบ ${c}: แบริ่งก้านตัวล่าง → ฝาประกับก้าน → น็อต 2 ตัว`,[`rod_bearing_${c}_lower`,`rod_cap_${c}`,`rod_cap_bolt_${c}_1`,`rod_cap_bolt_${c}_2`],{ordered:true,tip:'เลขบนฝาตรงกับก้าน · 20 N·m + 90°'})),
+  {quiz:Q.rodT},
+ ]},
+ {name:'4 · ระบบหล่อลื่น',cam:'under',hideBlock:false,steps:[
+  S('ใส่ปั๊มน้ำมันเครื่อง',['oil_pump'],{auto:N('oil_pump_bolt_',5)}),
+  S('ใส่ท่อดูดน้ำมันเครื่อง (strainer)',['oil_strainer'],{auto:N('strainer_nut_',2)}),
+  {quiz:Q.pan},
+  S('ใส่อ่างน้ำมันเครื่อง',['oil_pan'],{auto:[...N('oil_pan_bolt_',14),...N('oil_pan_nut_',2)]}),
+  S('ใส่น็อตถ่ายน้ำมันเครื่อง และกรองน้ำมันเครื่อง',['drain_plug_1','oil_filter_1'],{tip:'กรอง: ทาน้ำมันที่ยางซีล ขันมือ +3/4 รอบ'}),
+ ]},
+ {name:'5 · ฝาสูบ',cam:'head',hideBlock:false,steps:[
+  {quiz:Q.gasket},
+  S('วางปะเก็นฝาสูบ',['head_gasket'],{tip:'ตรวจรูน้ำ/รูน้ำมันให้ตรง'}),
+  S('วางฝาสูบ',['cylinder_head'],{tip:'ยกลงตรง ๆ ตามสลักนำ'}),
+  {quiz:Q.headT},
+  S('ขันน็อตฝาสูบ 10 ตัว ตามลำดับจากกลางออก',N('head_bolt_',10),{ordered:'centerOut',tip:'49 N·m → +90° → +90° · ทาน้ำมันเกลียวและใต้หัวน็อต'}),
+ ]},
+ {name:'6 · ชุดวาล์วและเพลาลูกเบี้ยว',cam:'head',hideBlock:false,hideHead:true,steps:[
+  {quiz:Q.valveOrder},
+  S('วาล์วไอดีสูบ 1 ตัวที่ 1: ซีล → วาล์ว → แหวนรอง → สปริง → จานรอง → ประกับ 2 ชิ้น',['valve_stem_seal_1I1','valve_1I1','valve_spring_seat_1I1','valve_spring_1I1','valve_retainer_1I1','valve_keeper_1I1_1','valve_keeper_1I1_2'],{ordered:true,focus:'valve_1I1',tip:'ทำครบ 1 ตัว อีก 15 ตัวโปรแกรมจะใส่ให้'}),
+  S('ใส่ชุดวาล์วที่เหลือ 15 ตัว (อัตโนมัติ) และลูกกระทุ้ง 16 ตัว',[],{auto:[...VALVES.slice(1).flatMap(v=>[`valve_stem_seal_${v}`,`valve_${v}`,`valve_spring_seat_${v}`,`valve_spring_${v}`,`valve_retainer_${v}`,`valve_keeper_${v}_1`,`valve_keeper_${v}_2`]),...VALVES.map(v=>`lifter_${v}`)]}),
+  {quiz:Q.lash},
+  S('วางเพลาลูกเบี้ยวไอดี และไอเสีย',['camshaft_intake','camshaft_exhaust'],{tip:'ทาน้ำมันที่ข้อ · ตั้งมาร์กตามคู่มือ'}),
+  S('ใส่ฝาประกับเพลาลูกเบี้ยว: ฝาหน้า แล้ว I2–I5, E2–E5',['cam_cap_1',...N('cam_cap_I',4).map((_,i)=>`cam_cap_I${i+2}`),...N('cam_cap_E',4).map((_,i)=>`cam_cap_E${i+2}`)],{ordered:true,tip:'ฝาหน้า (No.1) 23 N·m · ฝาอื่น 13 N·m · ขันตามลำดับในคู่มือ',auto:[...N('cam_cap1_bolt_',3),...[2,3,4,5].flatMap(i=>[`cam_cap_bolt_I${i}_1`,`cam_cap_bolt_I${i}_2`,`cam_cap_bolt_E${i}_1`,`cam_cap_bolt_E${i}_2`])]}),
+ ]},
+ {name:'7 · ระบบจังหวะ (ไทม์มิ่ง)',cam:'front',hideBlock:false,steps:[
+  {quiz:Q.timing},
+  S('ใส่เฟืองเพลาข้อเหวี่ยง และเฟืองเพลาลูกเบี้ยว 2 ตัว',['crank_sprocket','cam_sprocket_intake','cam_sprocket_exhaust'],{tip:'มาร์กเฟืองตรงมาร์กอ้างอิง'}),
+  S('คล้องโซ่ราวลิ้น',['timing_chain'],{tip:'ข้อโซ่สีตรงมาร์กเฟือง'}),
+  S('ใส่รางโซ่ (slipper) แผ่นกันโซ่ (damper) และตัวตั้งโซ่ (tensioner)',['chain_slipper','chain_damper','chain_tensioner'],{ordered:true,auto:['slipper_bolt_1',...N('damper_bolt_',2),...N('tensioner_nut_',2)],tip:'ห้ามหมุนเพลาข้อเหวี่ยงก่อนใส่ตัวตั้งโซ่ · หมุนทวนเข็มเล็กน้อยเพื่อปลดสลัก แล้วหมุนตามเข็มตรวจว่าสลิปเปอร์ถูกดัน'}),
+  S('ใส่ซีลหน้าเพลาข้อเหวี่ยง และฝาครอบโซ่ราวลิ้น',['crank_front_seal','timing_cover'],{ordered:true,auto:N('timing_cover_bolt_',13),tip:'ทา FIPG ที่ฝาครอบ ขันภายใน 15 นาที · น็อต 10 มม. 13 N·m'}),
+  S('ใส่พูลเลย์เพลาข้อเหวี่ยง และเซ็นเซอร์ตำแหน่งเพลาข้อเหวี่ยง',['crank_pulley','crank_position_sensor'],{auto:['crank_pulley_bolt_1','crank_sensor_plate','crank_sensor_bolt_1'],tip:'น็อตพูลเลย์ 138 N·m (1,407 kgf·cm) · เซ็นเซอร์ 9 N·m'}),
+ ]},
+ {name:'8 · อุปกรณ์ภายนอก',cam:'side',hideBlock:false,steps:[
+  S('ใส่ปั๊มน้ำ',['water_pump'],{auto:N('water_pump_bolt_',6)}),
+  S('ใส่ท่อร่วมไอดี และท่อร่วมไอเสีย',['intake_manifold','exhaust_manifold'],{auto:[...N('intake_manifold_nut_',8),...N('exhaust_manifold_nut_',8)],tip:'ปะเก็นใหม่ ขันสลับจากกลางออก · ท่อร่วมไอเสีย 37 N·m'}),
+  {quiz:Q.plug},
+  S('ใส่หัวเทียน 4 ตัว และคอยล์จุดระเบิด 4 ตัว',[...N('spark_plug_',4),...N('ignition_coil_',4)],{auto:N('coil_bolt_',4),xray:['cylinder_head','head_cover'],tip:'หัวเทียน 18 N·m (ขันมือก่อน) · คอยล์เสียบลงท่อหัวเทียน น็อต 9 N·m'}),
+  S('ใส่ปะเก็นฝาครอบวาล์ว ฝาครอบวาล์ว และฝาเติมน้ำมันเครื่อง',['head_cover_gasket','head_cover','oil_filler_cap'],{ordered:true,auto:[...N('head_cover_bolt_',9),...N('head_cover_nut_',2)]}),
+ ]},
+];
+const THAI=[[/^block$/,'เสื้อสูบ'],[/^crankshaft/,'เพลาข้อเหวี่ยง'],[/^bearing_cap_ladder/,'ฝาประกับเพลาข้อเหวี่ยง (ladder)'],[/^main_bearing_(\d)_(upper|lower)/,'แบริ่งเพลาข้อเหวี่ยง ตัว$1 ($2)'],[/^thrust_washer/,'แหวนกันรุน'],[/^main_cap_bolt_(\d+)/,'น็อตฝาประกับเพลาข้อเหวี่ยง #$1'],[/^ladder_bolt/,'น็อตฝาประกับ (หกเหลี่ยม)'],
+ [/^piston_pin_(\d)/,'สลักลูกสูบ สูบ$1'],[/^piston_(\d)/,'ลูกสูบ สูบ$1'],[/^pin_circlip/,'แหวนล็อกสลักลูกสูบ'],[/^ring_top_compression_(\d)/,'แหวนอัดตัวบน สูบ$1'],[/^ring_second_compression_(\d)/,'แหวนอัดตัวที่ 2 สูบ$1'],[/^ring_oil_control_(\d)/,'แหวนน้ำมัน สูบ$1'],[/^connecting_rod_(\d)/,'ก้านสูบ สูบ$1'],[/^rod_cap_bolt/,'น็อตฝาประกับก้านสูบ'],[/^rod_cap_(\d)/,'ฝาประกับก้านสูบ สูบ$1'],[/^rod_bearing_(\d)_(upper|lower)/,'แบริ่งก้านสูบ สูบ$1 ($2)'],
+ [/^cylinder_head/,'ฝาสูบ'],[/^head_gasket/,'ปะเก็นฝาสูบ'],[/^head_bolt_(\d+)/,'น็อตฝาสูบ #$1'],[/^valve_stem_seal/,'ซีลก้านวาล์ว'],[/^valve_spring_seat/,'แหวนรองสปริงวาล์ว'],[/^valve_spring/,'สปริงวาล์ว'],[/^valve_retainer/,'จานรองสปริงวาล์ว'],[/^valve_keeper/,'ประกับวาล์ว'],[/^valve_(\d)I/,'วาล์วไอดี สูบ$1'],[/^valve_(\d)E/,'วาล์วไอเสีย สูบ$1'],[/^lifter/,'ลูกกระทุ้งวาล์ว'],[/^camshaft_intake/,'เพลาลูกเบี้ยวไอดี'],[/^camshaft_exhaust/,'เพลาลูกเบี้ยวไอเสีย'],[/^cam_cap_bolt|^cam_cap1_bolt/,'น็อตฝาประกับเพลาลูกเบี้ยว'],[/^cam_cap/,'ฝาประกับเพลาลูกเบี้ยว'],
+ [/^cam_sprocket_intake/,'เฟืองเพลาลูกเบี้ยวไอดี'],[/^cam_sprocket_exhaust/,'เฟืองเพลาลูกเบี้ยวไอเสีย'],[/^crank_sprocket/,'เฟืองเพลาข้อเหวี่ยง'],[/^timing_chain/,'โซ่ราวลิ้น'],[/^chain_slipper/,'รางโซ่ (slipper)'],[/^chain_damper/,'แผ่นกันโซ่ (damper)'],[/^chain_tensioner/,'ตัวตั้งโซ่'],[/^timing_cover/,'ฝาครอบโซ่ราวลิ้น'],[/^crank_pulley/,'พูลเลย์เพลาข้อเหวี่ยง'],[/^crank_position_sensor/,'เซ็นเซอร์ตำแหน่งเพลาข้อเหวี่ยง'],[/^crank_front_seal/,'ซีลหน้าเพลาข้อเหวี่ยง'],[/^crank_rear_seal/,'ซีลท้ายเพลาข้อเหวี่ยง'],
+ [/^oil_pump/,'ปั๊มน้ำมันเครื่อง'],[/^oil_strainer/,'ท่อดูดน้ำมันเครื่อง'],[/^oil_pan/,'อ่างน้ำมันเครื่อง'],[/^oil_filter/,'กรองน้ำมันเครื่อง'],[/^drain_plug/,'น็อตถ่ายน้ำมันเครื่อง'],[/^oil_filler_cap/,'ฝาเติมน้ำมันเครื่อง'],[/^water_pump/,'ปั๊มน้ำ'],[/^intake_manifold/,'ท่อร่วมไอดี'],[/^exhaust_manifold/,'ท่อร่วมไอเสีย'],[/^spark_plug_(\d)/,'หัวเทียน สูบ$1'],[/^ignition_coil_(\d)/,'คอยล์จุดระเบิด สูบ$1'],[/^head_cover_gasket/,'ปะเก็นฝาครอบวาล์ว'],[/^head_cover/,'ฝาครอบวาล์ว']];
+function thaiName(n){ for(const [re,t] of THAI){ const m=n.match(re); if(m) return t.replace(/\$(\d)/g,(_,i)=>m[i]); } return n; }
+const CASING=/^(block|cylinder_head|head_cover|timing_cover|intake_manifold|exhaust_manifold|oil_pan|head_gasket|head_cover_gasket)/;
+
+// ====================================================================
+//  ENGINE / SCENE
+// ====================================================================
+const sc=new THREE.Scene(); sc.background=new THREE.Color(0x15171c);
+const cam=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,0.01,20);
+const r=new THREE.WebGLRenderer({antialias:true}); r.setPixelRatio(Math.min(devicePixelRatio,2)); r.setSize(innerWidth,innerHeight); r.localClippingEnabled=true; document.body.appendChild(r.domElement);
+sc.add(new THREE.HemisphereLight(0xffffff,0x8890a0,1.1)); sc.add(new THREE.AmbientLight(0xffffff,.35));
+const dl=new THREE.DirectionalLight(0xffffff,1.3); dl.position.set(1,2,1.5); sc.add(dl); const dl2=new THREE.DirectionalLight(0xffffff,1.0); dl2.position.set(-0.5,-2,1); sc.add(dl2);
+const ctl=new OrbitControls(cam,r.domElement); ctl.enableDamping=true; ctl.dampingFactor=.12;
+const CUT=new THREE.Plane(new THREE.Vector3(0,0,-1),0.024);
+
+const meshes={}, home={}, placedSet=new Set(), benchDelta={}; let blockMode='cut';
+function dims(n){ const m=meshes[n]; if(!m.userData.dims){ if(!m.geometry.boundingBox) m.geometry.computeBoundingBox(); m.userData.dims=m.geometry.boundingBox.getSize(new THREE.Vector3()); } return m.userData.dims; }
+function sameShape(a,b){ if(a===b) return true; const da=dims(a),db=dims(b); const t=0.02*Math.max(da.length(),db.length()); return Math.abs(da.x-db.x)<t&&Math.abs(da.y-db.y)<t&&Math.abs(da.z-db.z)<t; }
+function screenRadius(n){ const m=meshes[n]; if(!m.geometry.boundingSphere) m.geometry.computeBoundingSphere(); const r=m.geometry.boundingSphere.radius; const d=tgt(n).distanceTo(cam.position); const rect=r_dom(); return r/(d*Math.tan(THREE.MathUtils.degToRad(cam.fov/2)))*rect.height/2; }
+function r_dom(){ return r.domElement.getBoundingClientRect(); }
+const xrayOn=new Set(); function setXray(n,on){ const m=meshes[n]; if(!m) return; const hm=m.material; hm.transparent=on; hm.opacity=on?0.28:1; hm.depthWrite=!on; hm.needsUpdate=true; if(on) xrayOn.add(n); else xrayOn.delete(n); }
+function tgt(n){ const p=home[n].p.clone(); const par=cur&&cur.attach; if(par&&benchDelta[par]&&n!==par) p.add(benchDelta[par]); return p; }
+// position fixes: oil filter sits horizontally on the exhaust (front) side of the block, low, below the exhaust manifold
+const FIX={ oil_filter_1:{p:[0.05,0.21,0.168], rx:Math.PI/2} };
+const L=new GLTFLoader();
+L.parse(Uint8Array.from(atob(window.ENGINE_GLB),c=>c.charCodeAt(0)).buffer,'',g=>{
+  g.scene.traverse(o=>{ if(!o.isMesh) return;
+    o.name=o.name.replace(/\.?001$/,''); o.geometry.computeBoundingBox(); const c=o.geometry.boundingBox.getCenter(new THREE.Vector3()); o.geometry.translate(-c.x,-c.y,-c.z); o.position.copy(c);
+    if(FIX[o.name]){ const f=FIX[o.name]; if(f.p) o.position.set(...f.p); if(f.rx!==undefined) o.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),f.rx)); }
+    meshes[o.name]=o; home[o.name]={p:o.position.clone(),q:o.quaternion.clone()};
+    const m=o.material.clone(); m.flatShading=true; m.side=THREE.DoubleSide; m.metalness=Math.min(m.metalness??.3,.5); m.roughness=Math.max(m.roughness??.5,.45); m.needsUpdate=true; o.material=m;
+    if(/^(main|rod)_bearing|thrust_washer/.test(o.name)) m.color.set(0xcfa870); if(/^(valve_|ring_|piston_pin)/.test(o.name)) m.color.set(0xd8dce2); if(/seal/.test(o.name)) m.color.set(0x333); if(/sprocket/.test(o.name)) m.color.set(0x9aa0aa);
+    if(o.name==='block'){ m.color.set(0x9aa0a8); } { const c=m.color; const lum=0.299*c.r+0.587*c.g+0.114*c.b; if(lum<0.18) c.setRGB(0.36,0.38,0.42); }
+    o.visible=false; });
+  sc.add(g.scene); meshes.block.visible=true; applyBlock(); document.getElementById('load').style.display='none'; { const h=/#j(\d+)/.exec(location.hash); if(h){ const n=Math.min(+h[1],FLAT.length-1); for(let i=0;i<n;i++){ const f=FLAT[i]; if(f.parts){ autoPlace(f.parts); autoPlace(f.auto||[]); } } idx=n-1; window._jf=true; } } nextStep();
+});
+function applyBlock(){ const b=meshes.block; b.visible=blockMode!=='hide'; b.material.clippingPlanes=blockMode==='cut'?[CUT]:[]; document.getElementById('btnBlock').textContent='เสื้อสูบ: '+({cut:'ผ่า',solid:'ทึบ',hide:'ซ่อน'})[blockMode]; }
+document.getElementById('btnBlock').onclick=()=>{ blockMode={cut:'solid',solid:'hide',hide:'cut'}[blockMode]; applyBlock(); };
+
+// ====================================================================
+//  FLOW
+// ====================================================================
+const FLAT=[]; STAGES.forEach((st,si)=>st.steps.forEach(s=>FLAT.push(Object.assign({stage:si},s))));
+let insp=null, pDown=null; let idx=-1, cur=null, stepParts=[], tray=[], orderIdx=0, miss=0, t0=null, done=false, stageMiss={}, camLocked=false;
+const $=id=>document.getElementById(id);
+function setCam(key){ const [p,t]=CAM[key]; cam.position.set(...p); ctl.target.set(...t); }
+function nextStep(){
+  idx++; if(idx>=FLAT.length){ finish(); return; }
+  cur=FLAT[idx]; const st=STAGES[cur.stage]; $('prog').firstElementChild.style.width=(100*idx/FLAT.length)+'%';
+  const first=idx===0||FLAT[idx-1].stage!==cur.stage||window._jf; window._jf=false;
+  if(first){ if(!st.bench){ Object.values(meshes).forEach(m=>{ if(m.name!=='block' && m.parent && m.parent.type!=='Mesh') m.visible=placedSet.has(m.name); }); } setCam(st.cam); if(st.hideBlock){ blockMode='hide'; } else if(st.blockMode){ blockMode=st.blockMode; } else if(blockMode==='hide'){ blockMode='cut'; } applyBlock(); flash(st.name,'info',1400); }
+  { const want=new Set(cur.xray||(st.hideHead?['cylinder_head']:[])); [...xrayOn].forEach(n=>{ if(!want.has(n)) setXray(n,false); }); want.forEach(n=>setXray(n,true)); }
+  if(cur.quiz){ showQuiz(cur.quiz); return; }
+  $('stage').textContent=st.name; $('title').textContent=cur.t; $('tip').textContent=cur.tip||'';
+  stepParts=cur.parts.slice(); if(cur.ordered==='centerOut') stepParts=centerOut(stepParts);
+  orderIdx=0; tray=stepParts.map(n=>meshes[n]).filter(Boolean);
+  if(st.bench && cur.attach && meshes[cur.attach]){ const par=meshes[cur.attach]; if(!benchDelta[cur.attach]){ benchDelta[cur.attach]=BENCH.clone().sub(home[cur.attach].p); par.position.copy(BENCH); par.quaternion.copy(home[cur.attach].q); }
+    Object.values(meshes).forEach(m=>{ if(m.parent && m.parent.type!=='Mesh') m.visible=false; }); par.visible=true; par.children.forEach(c=>c.visible=true);
+    ctl.target.copy(BENCH); cam.position.copy(BENCH).add(new THREE.Vector3(0.22,0.20,0.34)); }
+  else if(cur.focus && meshes[cur.focus]){ const f=meshes[cur.focus]; const w=f.getWorldPosition(new THREE.Vector3()); ctl.target.copy(w); cam.position.copy(w).add(new THREE.Vector3(0.16,0.28,0.22)); }
+  if(!tray.length){ autoPlace(cur.auto||[]); setTimeout(nextStep,600); return; }
+  layTray();
+}
+function centerOut(names){ const cx=-0.024; return names.slice().sort((a,b)=>Math.abs(home[a].p.x-cx)-Math.abs(home[b].p.x-cx)); }
+function worldHome(n){ return home[n].p.clone(); }
+
+// ---- tray in front of the camera ----
+const ghosts=[]; const GHOST=new THREE.MeshBasicMaterial({color:0x4f8cff,transparent:true,opacity:.45,depthWrite:false,depthTest:false});
+function layTray(){
+  clearGhosts(); const n=tray.length;
+  tray.forEach((m,i)=>{ m.visible=true; if(m.parent&&m.parent.type==='Mesh'){ sc.attach(m); } m.quaternion.copy(home[m.name].q); m.userData.slot=i; m.userData.inTray=true; setTop(m,true); m.scale.setScalar(1); const r=new THREE.Box3().setFromObject(m).getBoundingSphere(new THREE.Sphere()).radius; const sc_=Math.min(1,0.045/Math.max(r,1e-4)); m.scale.setScalar(sc_); m.userData.trayScale=sc_; numberLabel(m, cur.ordered? stepParts.indexOf(m.name)+1 : 0); if(m.userData.label) m.userData.label.scale.set(.03/sc_,.03/sc_,1); });
+  updateTray(); refreshGhosts();
+}
+function setTop(m,on){ m.traverse(c=>{ if(c.isMesh){ c.material.depthTest=!on; c.material.transparent=on; c.material.needsUpdate=true; c.renderOrder=on?10:0; } }); }
+function updateTray(){   // tray rides with the camera like a toolbar
+  const n=tray.length; if(!n) return;
+  const fwd=cam.getWorldDirection(new THREE.Vector3()); const right=new THREE.Vector3().crossVectors(fwd,cam.up).normalize(); const up=new THREE.Vector3().crossVectors(right,fwd).normalize();
+  const D=0.55; const vh=2*D*Math.tan(THREE.MathUtils.degToRad(cam.fov/2)), vw=vh*cam.aspect;
+  const base=cam.position.clone().add(fwd.multiplyScalar(D)).add(up.multiplyScalar(-vh*0.34));
+  const span=Math.min(vw*0.85,0.11*n);
+  tray.forEach(m=>{ if(m===drag) return; const i=m.userData.slot; const x=n===1?0:-span/2+i*span/(n-1); m.position.copy(base).add(right.clone().multiplyScalar(x)); m.userData.trayPos=m.position.clone(); });
+}
+function numberLabel(m,num){ (m.userData.label&&m.remove(m.userData.label)); if(!num) return; const c=document.createElement('canvas'); c.width=c.height=64; const x=c.getContext('2d'); x.fillStyle='#4f8cff'; x.beginPath(); x.arc(32,32,30,0,7); x.fill(); x.fillStyle='#fff'; x.font='bold 36px sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(num,32,34);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false})); sp.renderOrder=11; sp.scale.set(.03,.03,1); sp.position.set(0,0.05,0); m.add(sp); m.userData.label=sp; }
+function clearGhosts(){ ghosts.forEach(g=>sc.remove(g)); ghosts.length=0; }
+function refreshGhosts(){ clearGhosts(); if(!cur||!cur.parts) return; const names=cur.ordered?[stepParts[orderIdx]].filter(Boolean):stepParts.filter(n=>!placedSet.has(n)); names.forEach(n=>{ const m=meshes[n]; if(!m) return; const g=new THREE.Mesh(m.geometry,GHOST); g.renderOrder=5; g.position.copy(tgt(n)); g.quaternion.copy(home[n].q); sc.add(g); ghosts.push(g); }); }
+
+// ---- drag & drop (screen-space snapping) ----
+const ray=new THREE.Raycaster(), ptr=new THREE.Vector2(); let drag=null, plane=new THREE.Plane(), off=new THREE.Vector3(), hitP=new THREE.Vector3();
+function toNDC(e){ const rect=r.domElement.getBoundingClientRect(); ptr.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1); }
+function screenDist(e,p3){ const rect=r.domElement.getBoundingClientRect(); const v=p3.clone().project(cam); return Math.hypot((v.x+1)/2*rect.width+rect.left-e.clientX,(1-v.y)/2*rect.height+rect.top-e.clientY); }
+function pick(e){ toNDC(e); ray.setFromCamera(ptr,cam); const h=ray.intersectObjects(tray,false); if(h.length) return h[0].object;
+  let best=null,bd=44; tray.forEach(m=>{ const d=screenDist(e,m.getWorldPosition(new THREE.Vector3())); if(d<bd){bd=d;best=m;} }); return best; }
+r.domElement.addEventListener('pointerdown',e=>{ if(done||drag) return; pDown={x:e.clientX,y:e.clientY,t:Date.now()}; if(insp){ return; } if(!cur||!cur.parts){ return; } const m=pick(e); if(!m) return; if(!t0) t0=Date.now();
+  if(cur.ordered && m.name!==stepParts[orderIdx]){ wrong(`ลำดับผิด — ชิ้นที่ ${orderIdx+1} ก่อน`); shake(m); return; }
+  drag=m; m.scale.setScalar(1); if(m.userData.label) m.userData.label.scale.set(.03,.03,1); ctl.enabled=false; plane.setFromNormalAndCoplanarPoint(cam.getWorldDirection(new THREE.Vector3()).negate(), m.position); toNDC(e); ray.setFromCamera(ptr,cam); ray.ray.intersectPlane(plane,hitP); off.copy(m.position).sub(hitP); r.domElement.setPointerCapture(e.pointerId); });
+r.domElement.addEventListener('pointermove',e=>{ if(!drag) return; toNDC(e); ray.setFromCamera(ptr,cam); if(ray.ray.intersectPlane(plane,hitP)) drag.position.copy(hitP.add(off)); });
+r.domElement.addEventListener('pointerup',e=>{
+  if(!drag && pDown){ const dd=Math.hypot(e.clientX-pDown.x,e.clientY-pDown.y), dt=Date.now()-pDown.t; pDown=null; if(dd<8 && dt<800){ if(insp){ endInspect(); return; } const h=pickPlaced(e); if(h) startInspect(h); return; } }
+  pDown=null; if(!drag) return; const m=drag; drag=null; ctl.enabled=!camLocked;
+  const all=cur.ordered?[stepParts[orderIdx]]:stepParts.filter(n=>!placedSet.has(n));
+  const targets=all.filter(n=>sameShape(n,m.name));   // only targets of an identical part (same dimensions)
+  const tol=n=>Math.max(60, 0.6*screenRadius(n));   // big parts get a bigger drop zone
+  let best=null,bd=1e9; targets.forEach(n=>{ const d=screenDist(e,tgt(n))-tol(n)+60; if(d<bd){bd=d;best=n;} });
+  let ob=null,od=1e9; all.forEach(n=>{ if(targets.includes(n)) return; const d=screenDist(e,tgt(n))-tol(n)+60; if(d<od){od=d;ob=n;} });
+  if(best && bd<60){ snap(m,best); } else if(ob && od<60){ tween(m,m.userData.trayPos,220); if(m.userData.trayScale){ m.scale.setScalar(m.userData.trayScale); if(m.userData.label) m.userData.label.scale.set(.03/m.userData.trayScale,.03/m.userData.trayScale,1); } wrong('ผิดชิ้น — ตรงนี้คือ '+thaiName(ob)); } else { tween(m,m.userData.trayPos,220); if(m.userData.trayScale){ m.scale.setScalar(m.userData.trayScale); if(m.userData.label) m.userData.label.scale.set(.03/m.userData.trayScale,.03/m.userData.trayScale,1); } if(bd<140) wrong('ใกล้แล้ว — วางให้ตรงเงาสีฟ้า'); } });
+function snap(m,target){ m.quaternion.copy(home[target].q); tween(m,tgt(target),180,()=>{ if(cur.attach && meshes[cur.attach] && m!==meshes[cur.attach]) meshes[cur.attach].attach(m); });
+  placedSet.add(target); tray=tray.filter(x=>x!==m); tray.forEach((t,i)=>t.userData.slot=i); setTop(m,false); m.userData.inTray=false; if(m.userData.label){ m.remove(m.userData.label); m.userData.label=null; } if(cur.ordered) orderIdx++; refreshGhosts(); flash('ถูกต้อง ✓','ok');
+  if(stepParts.every(n=>placedSet.has(n))){ autoPlace(cur.auto||[]); setTimeout(nextStep,500); } }
+function autoPlace(names){ names.forEach(n=>{ const m=meshes[n]; if(!m) return; if(m.userData.label){ m.remove(m.userData.label); m.userData.label=null; } m.visible=true; m.position.copy(home[n].p); m.quaternion.copy(home[n].q); m.userData.inTray=false; setTop(m,false); m.scale.setScalar(1); placedSet.add(n); }); if(names.length) flash(`ใส่ให้อัตโนมัติ ${names.length} ชิ้น`,'info'); }
+function wrong(t){ miss++; stageMiss[cur.stage]=(stageMiss[cur.stage]||0)+1; $('miss').textContent=miss; flash(t,'bad'); }
+function shake(m){ const p=m.position.x; let i=0; const id=setInterval(()=>{ m.position.x=p+(i%2?0.01:-0.01); if(++i>6){ m.position.x=p; clearInterval(id);} },40); }
+function tween(m,to,ms,cb){ const from=m.position.clone(), st=performance.now(); (function f(){ const k=Math.min(1,(performance.now()-st)/ms), e=1-Math.pow(1-k,3); m.position.lerpVectors(from,to,e); if(k<1) requestAnimationFrame(f); else cb&&cb(); })(); }
+let msgT; function flash(t,c,ms=900){ const el=$('msg'); el.textContent=t; el.className=c+' show'; clearTimeout(msgT); msgT=setTimeout(()=>el.className=c,ms); }
+
+// ---- inspect (tap an installed part to lift it out and look at it) ----
+function pickPlaced(e){ toNDC(e); ray.setFromCamera(ptr,cam); const cands=Object.values(meshes).filter(m=>m.visible&&m.name!=='block'&&!m.userData.inTray&&(m.parent===null||m.parent.type!=='Mesh')); const h=ray.intersectObjects(cands,true); if(!h.length) return null; let o=h[0].object; while(o.parent&&o.parent.type==='Mesh') o=o.parent; return o; }
+function startInspect(m){ insp={m,pos:m.position.clone(),quat:m.quaternion.clone(),parentDepth:[]}; m.traverse(c=>{ if(c.isMesh){ insp.parentDepth.push([c,c.material.depthTest,c.renderOrder]); c.material.depthTest=false; c.renderOrder=20; } });
+  const fwd=cam.getWorldDirection(new THREE.Vector3()); const bs=new THREE.Box3().setFromObject(m).getBoundingSphere(new THREE.Sphere()); const dist=Math.max(0.3, bs.radius*3.4); const to=cam.position.clone().add(fwd.multiplyScalar(dist)); tween(m,to,250); ctl.enabled=false;
+  const el=document.getElementById('insp'); el.textContent=thaiName(m.name)+'  ·  แตะอีกครั้งเพื่อวางกลับ'; el.style.display='block'; }
+function endInspect(){ if(!insp) return; const {m,pos,quat,parentDepth}=insp; insp=null; m.quaternion.copy(quat); tween(m,pos,250,()=>{ parentDepth.forEach(([c,d,r])=>{ c.material.depthTest=d; c.renderOrder=r; }); }); ctl.enabled=!camLocked; document.getElementById('insp').style.display='none'; }
+// ---- buttons ----
+$('btnHint').onclick=()=>{ if(!cur||!cur.parts) return; const name=cur.ordered?stepParts[orderIdx]:stepParts.find(n=>!placedSet.has(n)); if(!name) return; wrong('ใช้ตัวช่วย'); const g=new THREE.Mesh(new THREE.SphereGeometry(0.03,16,12),new THREE.MeshBasicMaterial({color:0xffb648,transparent:true,opacity:.7,depthTest:false})); g.position.copy(tgt(name)); sc.add(g); let i=0; const id=setInterval(()=>{ g.scale.setScalar(1+0.5*Math.sin(i/3)); if(++i>45){ sc.remove(g); clearInterval(id);} },40); };
+let vi=0; $('btnView').onclick=()=>{ const keys=Object.keys(CAM); setCam(keys[++vi%keys.length]); };
+$('btnLock').onclick=e=>{ camLocked=!camLocked; ctl.enabled=!camLocked; e.target.classList.toggle('on',camLocked); e.target.textContent=camLocked?'ปลดล็อกกล้อง':'ล็อกกล้อง'; };
+$('btnSkip').onclick=()=>{ if(!cur) return; if(cur.parts){ stepParts.forEach(n=>{ if(!placedSet.has(n)) autoPlace([n]); }); autoPlace(cur.auto||[]); wrong('ข้ามขั้น (-5)'); miss+=4; $('miss').textContent=miss; } $('quiz').style.display='none'; clearGhosts(); tray=[]; nextStep(); };
+
+// ---- quiz ----
+function showQuiz(q){ const box=$('quiz'); box.style.display='flex'; $('qT').textContent=q.q; $('qP').textContent='เลือกคำตอบที่ถูกต้อง'; $('qE').textContent=''; $('qNext').style.display='none'; $('qO').innerHTML='';
+  q.o.forEach((o,i)=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=o; b.onclick=()=>{ if($('qNext').style.display!=='none') return; [...$('qO').children].forEach(x=>x.disabled=true); if(!t0) t0=Date.now();
+     if(i===q.a){ b.classList.add('ok'); } else { b.classList.add('bad'); $('qO').children[q.a].classList.add('ok'); wrong('ตอบผิด'); }
+     $('qE').textContent=q.e; $('qNext').style.display='inline-block'; }; $('qO').appendChild(b); });
+  $('qNext').onclick=()=>{ box.style.display='none'; nextStep(); }; }
+
+// ---- finish ----
+function finish(){ done=true; $('prog').firstElementChild.style.width='100%'; const sec=Math.round((Date.now()-(t0||Date.now()))/1000); const score=Math.max(0,100-miss*2);
+  $('eT').textContent=`เสร็จสิ้น — คะแนน ${score}/100 ${score>=70?'· ผ่าน ✓':'· ไม่ผ่าน'}`; $('eP').textContent=`เวลา ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')} · ผิดพลาดรวม ${miss} ครั้ง`;
+  $('eB').innerHTML='<table class="sc">'+STAGES.map((s,i)=>`<tr><td>${s.name}</td><td>${stageMiss[i]||0} ผิดพลาด</td></tr>`).join('')+'</table>'; $('end').style.display='flex'; blockMode='solid'; applyBlock(); setCam('side'); }
+
+setInterval(()=>{ if(t0&&!done){ const s=Math.round((Date.now()-t0)/1000); $('time').textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; } },500);
+addEventListener('resize',()=>{ cam.aspect=innerWidth/innerHeight; cam.updateProjectionMatrix(); r.setSize(innerWidth,innerHeight); });
+(function loop(){ requestAnimationFrame(loop); ctl.update(); updateTray(); if(insp){ insp.m.rotateOnWorldAxis(new THREE.Vector3(0,1,0),0.012); } GHOST.opacity=.25+.15*Math.sin(performance.now()/300); r.render(sc,cam); })();
+</script></body></html>
