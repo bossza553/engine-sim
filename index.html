@@ -27,7 +27,7 @@ canvas{display:block}
 </style>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/"}}</script>
 </head><body>
-<div id="load"><b>กำลังโหลดเครื่องยนต์…</b><span>371 ชิ้นส่วน · ครั้งแรกอาจใช้เวลาสักครู่</span></div>
+<div id="load"><b>กำลังโหลดเครื่องยนต์…</b><span>384 ชิ้นส่วน · ครั้งแรกอาจใช้เวลาสักครู่</span></div>
 <div id="top"><div id="stage"></div><div id="title"></div><div id="tip"></div><div id="prog"><i></i></div></div>
 <div id="hud">เวลา <b id="time">0:00</b><br>ผิดพลาด <b id="miss">0</b></div>
 <div id="bottom">
@@ -83,7 +83,7 @@ const STAGES=[
  {name:'1 · ลูกสูบและก้านสูบ (บนโต๊ะงาน)',cam:'bench',hideBlock:true,steps:[
   ...CYL.flatMap(c=>[
    S(`สูบ ${c}: แหวนล็อกตัวแรก → ก้านสูบ → สลักลูกสูบ → แหวนล็อกตัวที่สอง`,[`pin_circlip_${c}_a`,`connecting_rod_${c}`,`piston_pin_${c}`,`pin_circlip_${c}_b`],{ordered:true,attach:`piston_${c}`,focus:`piston_${c}`,tip:'อุ่นลูกสูบ 80–90 °C · เครื่องหมายด้านหน้าของลูกสูบและก้านสูบหันทางเดียวกัน · ดันสลักด้วยนิ้วหัวแม่มือ'}),
-   S(`สูบ ${c}: ใส่แหวนน้ำมัน → แหวนอัดตัวที่ 2 → แหวนอัดตัวบน`,[`ring_oil_control_${c}`,`ring_second_compression_${c}`,`ring_top_compression_${c}`],{ordered:true,attach:`piston_${c}`,focus:`piston_${c}`,tip:'แหวนอัดใช้คีมถ่างแหวน อย่าถ่างเกิน · เครื่องหมายหันขึ้น'}),
+   S(`สูบ ${c}: แหวนน้ำมัน 3 ชิ้น (ตัวถ่าง → แหวนข้าง 2 ตัว) → แหวนอัดตัวที่ 2 → แหวนอัดตัวบน`,[`ring_oil_expander_${c}`,`ring_oil_rail_${c}_lower`,`ring_oil_rail_${c}_upper`,`ring_second_compression_${c}`,`ring_top_compression_${c}`],{ordered:true,attach:`piston_${c}`,focus:`piston_${c}`,tip:'แหวนน้ำมันใส่ด้วยมือ · แหวนอัดใช้คีมถ่างแหวน อย่าถ่างเกิน · เครื่องหมายหันขึ้น'}),
    S(`สูบ ${c}: ใส่แบริ่งก้านตัวบนเข้าก้านสูบ`,[`rod_bearing_${c}_upper`],{attach:`piston_${c}`,focus:`rod_bearing_${c}_upper`,camOff:[0.18,-0.18,0.26],tip:'ลิ้นล็อกตรงร่องบาก · หลังแบริ่งต้องสะอาด ไม่มีน้ำมัน'}),
    S(`สูบ ${c}: ใส่แบริ่งก้านตัวล่างเข้าฝาประกับก้าน`,[`rod_bearing_${c}_lower`],{attach:`rod_cap_${c}`,focus:`rod_cap_${c}`,tip:'ลิ้นล็อกตรงร่องบาก · หลังแบริ่งต้องสะอาด ไม่มีน้ำมัน'}),
   ]),
@@ -108,7 +108,7 @@ const STAGES=[
   {quiz:Q.rodT},
  ]},
  {name:'4 · ระบบหล่อลื่น',cam:'under',steps:[
-  S('ใส่ท่อดูดน้ำมันเครื่อง (strainer)',['oil_strainer'],{auto:N('strainer_nut_',2),tip:'ปะเก็นใหม่ · 9 N·m'}),
+  S('ใส่ปะเก็น แล้วใส่ท่อดูดน้ำมันเครื่อง (strainer)',['oil_strainer_gasket','oil_strainer'],{ordered:true,auto:N('strainer_nut_',2),tip:'ปะเก็นใหม่ · 9 N·m'}),
   {quiz:Q.pan},
   S('ใส่อ่างน้ำมันเครื่อง',['oil_pan'],{auto:[...N('oil_pan_bolt_',14),...N('oil_pan_nut_',2)],tip:'ยึด 16 จุด 9 N·m'}),
   S('ใส่น็อตถ่ายน้ำมันเครื่อง',['drain_plug_1'],{tip:'ปะเก็นใหม่ · 37 N·m'}),
@@ -133,7 +133,7 @@ const STAGES=[
   S('ใส่ฝาประกับเพลาลูกเบี้ยว: ฝาหน้า แล้ว I2–I5, E2–E5',['cam_cap_1',...N('cam_cap_I',4).map((_,i)=>`cam_cap_I${i+2}`),...N('cam_cap_E',4).map((_,i)=>`cam_cap_E${i+2}`)],{ordered:true,tip:'ฝาหน้า (No.1) 23 N·m · ฝาอื่น 13 N·m · ขันตามลำดับในคู่มือ',auto:[...N('cam_cap1_bolt_',3),...[2,3,4,5].flatMap(i=>[`cam_cap_bolt_I${i}_1`,`cam_cap_bolt_I${i}_2`,`cam_cap_bolt_E${i}_1`,`cam_cap_bolt_E${i}_2`])]}),
  ]},
  {name:'7 · ระบบจังหวะ (ไทม์มิ่ง)',cam:'front',steps:[
-  S('ใส่ปั๊มน้ำมันเครื่อง',['oil_pump'],{auto:N('oil_pump_bolt_',5),tip:'ปะเก็นใหม่ · ร่องฟันโรเตอร์ขับสวมตรงกับเพลาข้อเหวี่ยง · น็อต 5 ตัว 9 N·m'}),
+  S('ใส่ปะเก็นปั๊มน้ำมันเครื่องที่เสื้อสูบ แล้วใส่ปั๊มน้ำมันเครื่อง',['oil_pump_gasket','oil_pump'],{ordered:true,auto:N('oil_pump_bolt_',5),tip:'ปะเก็นใหม่ · ร่องฟันโรเตอร์ขับสวมตรงกับเพลาข้อเหวี่ยง · น็อต 5 ตัว 9 N·m'}),
   S('ใส่แผ่นกันโซ่ (damper)',['chain_damper'],{auto:N('damper_bolt_',2),tip:'ยึดด้วยน็อต 2 ตัว · ใส่ก่อนคล้องโซ่'}),
   {quiz:Q.timing},
   S('ใส่เฟืองเพลาข้อเหวี่ยงพร้อมโซ่ราวลิ้น',['crank_sprocket','timing_chain'],{ordered:true,tip:'ข้อโซ่สีเหลืองตรงมาร์กเฟืองเพลาข้อเหวี่ยง แล้วสวมเฟืองเข้าเพลา · จากนั้นคล้องโซ่กับเฟืองเพลาลูกเบี้ยวให้ข้อสีเหลืองตรงมาร์ก'}),
@@ -141,23 +141,25 @@ const STAGES=[
   S('ใส่แผ่นสัญญาณเซ็นเซอร์เพลาข้อเหวี่ยง (sensor plate)',['crank_sensor_plate'],{tip:'เครื่องหมาย F หันออกด้านหน้า · ต้องใส่ก่อนปิดฝาครอบโซ่'}),
   S('บนโต๊ะงาน · ตอกซีลหน้าเพลาข้อเหวี่ยงเข้าฝาครอบโซ่ราวลิ้น',['crank_front_seal'],{attach:'timing_cover',focus:'crank_front_seal',tip:'ทาจาระบีบาง ๆ ที่ปากซีล · ตอกให้เสมอขอบฝาครอบ'}),
   S('ประกอบฝาครอบโซ่ราวลิ้น (พร้อมซีลหน้า)',['timing_cover'],{auto:N('timing_cover_bolt_',13),tip:'ทา FIPG แล้วประกอบฝาครอบภายใน 3 นาที · น็อต 13 N·m / 19 N·m'}),
+  S('บนโต๊ะงาน · ใส่โอริงเข้าตัวตั้งโซ่',['tensioner_o_ring'],{attach:'chain_tensioner',tip:'ตรวจโอริงให้สะอาด · ทาน้ำมันเครื่องบาง ๆ อย่าให้บิด'}),
   S('ใส่ตัวตั้งโซ่ (tensioner) จากด้านนอกฝาครอบโซ่',['chain_tensioner'],{auto:N('tensioner_nut_',2),tip:'กดลูกสูบตัวตั้งโซ่แล้วเกี่ยวขอล็อกไว้ก่อนใส่ · ทาน้ำมันที่โอริง · น็อต 2 ตัว 9 N·m'}),
   S('ใส่พูลเลย์เพลาข้อเหวี่ยง',['crank_pulley'],{auto:['crank_pulley_bolt_1'],tip:'น็อตพูลเลย์ 138 N·m (1,407 kgf·cm) · จากนั้นหมุนเพลาข้อเหวี่ยงทวนเข็มเพื่อปลดขอล็อกตัวตั้งโซ่ แล้วหมุนตามเข็มตรวจว่ารางโซ่ถูกดัน'}),
   S('ใส่เซ็นเซอร์ตำแหน่งเพลาข้อเหวี่ยง',['crank_position_sensor'],{auto:['crank_sensor_bolt_1'],tip:'ทาน้ำมันที่โอริง · น็อต 9 N·m'}),
  ]},
  {name:'8 · ฝาครอบวาล์วและอุปกรณ์ภายนอก',cam:'side',steps:[
-  S('ใส่ปั๊มน้ำ',['water_pump'],{auto:N('water_pump_bolt_',6),tip:'โอริงใหม่'}),
-  S('ใส่ท่อร่วมไอดี และท่อร่วมไอเสีย',['intake_manifold','exhaust_manifold'],{auto:[...N('intake_manifold_nut_',8),...N('exhaust_manifold_nut_',8)],tip:'ปะเก็นใหม่ ขันสลับจากกลางออก · ท่อร่วมไอเสีย 37 N·m'}),
+  S('ใส่โอริงปั๊มน้ำที่ฝาครอบโซ่ แล้วใส่ปั๊มน้ำ',['water_pump_o_ring','water_pump'],{ordered:true,cam:'front',auto:N('water_pump_bolt_',6),tip:'โอริงใหม่'}),
+  S('ปะเก็นท่อร่วมไอดี → ท่อร่วมไอดี → ปะเก็นท่อร่วมไอเสีย → ท่อร่วมไอเสีย',['intake_manifold_gasket','intake_manifold','exhaust_manifold_gasket','exhaust_manifold'],{ordered:true,cam:'side',auto:[...N('intake_manifold_nut_',8),...N('exhaust_manifold_nut_',8)],tip:'ปะเก็นใหม่ ขันสลับจากกลางออก · ท่อร่วมไอเสีย 37 N·m'}),
   {quiz:Q.lash},
   S('บนโต๊ะงาน · ใส่ปะเก็นเข้าฝาครอบวาล์ว',['head_cover_gasket'],{attach:'head_cover',camOff:[0.25,-0.40,0.55],tip:'ปะเก็นใหม่'}),
   S('ประกอบฝาครอบวาล์ว (พร้อมปะเก็น)',['head_cover'],{auto:[...N('head_cover_bolt_',9),...N('head_cover_nut_',2)],tip:'ทากาวซีล (FIPG) 2 จุด แล้วประกอบภายใน 3 นาที'}),
   {quiz:Q.plug},
   S('ใส่หัวเทียน 4 ตัว',N('spark_plug_',4),{xray:['cylinder_head','head_cover'],tip:'25 N·m (ขันมือก่อน)'}),
-  S('ใส่ฝาเติมน้ำมันเครื่อง',['oil_filler_cap'],{tip:'ปะเก็นใหม่'}),
+  S('บนโต๊ะงาน · ใส่ปะเก็นเข้าฝาเติมน้ำมันเครื่อง',['oil_filler_cap_gasket'],{attach:'oil_filler_cap',camOff:[0.12,-0.14,0.20],tip:'ปะเก็นใหม่'}),
+  S('ใส่ฝาเติมน้ำมันเครื่อง (พร้อมปะเก็น)',['oil_filler_cap'],{}),
   S('ใส่คอยล์จุดระเบิด 4 ตัว',N('ignition_coil_',4),{auto:N('coil_bolt_',4),xray:['head_cover'],tip:'ใส่หลังฝาครอบวาล์วและหัวเทียน · คอยล์เสียบลงท่อหัวเทียน น็อต 9 N·m'}),
  ]},
 ];
-const THAI=[[/^block$/,'เสื้อสูบ'],[/^crankshaft/,'เพลาข้อเหวี่ยง'],[/^bearing_cap_ladder/,'ฝาประกับเพลาข้อเหวี่ยง (ladder)'],[/^main_bearing_(\d)_(upper|lower)/,'แบริ่งเพลาข้อเหวี่ยง ตัว$1 ($2)'],[/^thrust_washer/,'แหวนกันรุน'],[/^main_cap_bolt_(\d+)/,'น็อตฝาประกับเพลาข้อเหวี่ยง #$1'],[/^ladder_bolt/,'น็อตฝาประกับ (หกเหลี่ยม)'],
+const THAI=[[/^oil_strainer_gasket/,'ปะเก็นท่อดูดน้ำมันเครื่อง'],[/^oil_pump_gasket/,'ปะเก็นปั๊มน้ำมันเครื่อง'],[/^water_pump_o_ring/,'โอริงปั๊มน้ำ'],[/^oil_filler_cap_gasket/,'ปะเก็นฝาเติมน้ำมันเครื่อง'],[/^intake_manifold_gasket/,'ปะเก็นท่อร่วมไอดี'],[/^exhaust_manifold_gasket/,'ปะเก็นท่อร่วมไอเสีย'],[/^tensioner_o_ring/,'โอริงตัวตั้งโซ่'],[/^ring_oil_expander_(\d)/,'ตัวถ่างแหวนน้ำมัน (expander) สูบ$1'],[/^ring_oil_rail_(\d)/,'แหวนข้างแหวนน้ำมัน (side rail) สูบ$1'],[/^block$/,'เสื้อสูบ'],[/^crankshaft/,'เพลาข้อเหวี่ยง'],[/^bearing_cap_ladder/,'ฝาประกับเพลาข้อเหวี่ยง (ladder)'],[/^main_bearing_(\d)_(upper|lower)/,'แบริ่งเพลาข้อเหวี่ยง ตัว$1 ($2)'],[/^thrust_washer/,'แหวนกันรุน'],[/^main_cap_bolt_(\d+)/,'น็อตฝาประกับเพลาข้อเหวี่ยง #$1'],[/^ladder_bolt/,'น็อตฝาประกับ (หกเหลี่ยม)'],
  [/^piston_pin_(\d)/,'สลักลูกสูบ สูบ$1'],[/^piston_(\d)/,'ลูกสูบ สูบ$1'],[/^pin_circlip/,'แหวนล็อกสลักลูกสูบ'],[/^ring_top_compression_(\d)/,'แหวนอัดตัวบน สูบ$1'],[/^ring_second_compression_(\d)/,'แหวนอัดตัวที่ 2 สูบ$1'],[/^ring_oil_control_(\d)/,'แหวนน้ำมัน สูบ$1'],[/^connecting_rod_(\d)/,'ก้านสูบ สูบ$1'],[/^rod_cap_bolt/,'น็อตฝาประกับก้านสูบ'],[/^rod_cap_(\d)/,'ฝาประกับก้านสูบ สูบ$1'],[/^rod_bearing_(\d)_(upper|lower)/,'แบริ่งก้านสูบ สูบ$1 ($2)'],
  [/^cylinder_head/,'ฝาสูบ'],[/^head_gasket/,'ปะเก็นฝาสูบ'],[/^head_bolt_(\d+)/,'น็อตฝาสูบ #$1'],[/^valve_stem_seal/,'ซีลก้านวาล์ว'],[/^valve_spring_seat/,'แหวนรองสปริงวาล์ว'],[/^valve_spring/,'สปริงวาล์ว'],[/^valve_retainer/,'จานรองสปริงวาล์ว'],[/^valve_keeper/,'ประกับวาล์ว'],[/^valve_(\d)I/,'วาล์วไอดี สูบ$1'],[/^valve_(\d)E/,'วาล์วไอเสีย สูบ$1'],[/^lifter/,'ลูกกระทุ้งวาล์ว'],[/^camshaft_intake/,'เพลาลูกเบี้ยวไอดี'],[/^camshaft_exhaust/,'เพลาลูกเบี้ยวไอเสีย'],[/^cam_cap_bolt|^cam_cap1_bolt/,'น็อตฝาประกับเพลาลูกเบี้ยว'],[/^cam_cap/,'ฝาประกับเพลาลูกเบี้ยว'],
  [/^cam_sprocket_intake/,'เฟืองเพลาลูกเบี้ยวไอดี'],[/^cam_sprocket_exhaust/,'เฟืองเพลาลูกเบี้ยวไอเสีย'],[/^crank_sprocket/,'เฟืองเพลาข้อเหวี่ยง'],[/^timing_chain/,'โซ่ราวลิ้น'],[/^chain_slipper/,'รางโซ่ (slipper)'],[/^chain_damper/,'แผ่นกันโซ่ (damper)'],[/^chain_tensioner/,'ตัวตั้งโซ่'],[/^timing_cover/,'ฝาครอบโซ่ราวลิ้น'],[/^crank_pulley/,'พูลเลย์เพลาข้อเหวี่ยง'],[/^crank_sensor_plate/,'แผ่นสัญญาณเซ็นเซอร์เพลาข้อเหวี่ยง'],[/^crank_position_sensor/,'เซ็นเซอร์ตำแหน่งเพลาข้อเหวี่ยง'],[/^crank_front_seal/,'ซีลหน้าเพลาข้อเหวี่ยง'],[/^crank_rear_seal/,'ซีลท้ายเพลาข้อเหวี่ยง'],
